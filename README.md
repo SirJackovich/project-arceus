@@ -33,6 +33,29 @@ Intentionally out of scope for now:
 
 ## How To Run
 
+Import a pasted battle log:
+
+```bash
+python3 scripts/import_log.py
+```
+
+Imported logs use this filename convention:
+
+```text
+game_045_20260703_loss_vs_dragapult_annihilape_v01.txt
+```
+
+The format is `game_<number>_<yyyymmdd>_<result>_vs_<opponent-or-archetype>_<deck>.txt`.
+
+Normalize existing logs into that convention:
+
+```bash
+python3 scripts/normalize_logs.py --dry-run
+python3 scripts/normalize_logs.py
+```
+
+The normalizer archives old filenames in `data/logs_original/`, rewrites `data/logs/`, and rebuilds both `data/manifest.csv` and the more readable `data/manifest.json`.
+
 Parse all logs:
 
 ```bash
@@ -73,12 +96,15 @@ python3 scripts/analyze_logs.py --input-dir sample_data --output-dir /tmp/projec
 
 ## Example Workflow
 
-1. Export a new battle log from Pokemon TCG Live.
-2. Save it into `data/logs/`.
-3. Run the full local analysis flow.
-4. Open `data/analysis/monkey_deck_analysis.xlsx`.
-5. Review success-condition misses, attack usage, and card effectiveness.
-6. Choose one experiment from `experiments/` or add a new one.
+1. Copy the battle log from Pokemon TCG Live.
+2. Run `python3 scripts/import_log.py`.
+3. Paste the battle log, then type `::END_LOG::` on its own line.
+4. Confirm the inferred opponent, result, first-player, and concession values.
+5. Answer the remaining metadata prompts for date, deck version, ranked points, and notes.
+6. Run the full local analysis flow.
+7. Open `data/analysis/monkey_deck_analysis.xlsx`.
+8. Review success-condition misses, attack usage, and card effectiveness.
+9. Choose one experiment from `experiments/` or add a new one.
 
 ## Coaching Object
 
@@ -93,4 +119,3 @@ AI coaching recommendations should use this shape:
   "next_experiment": "..."
 }
 ```
-

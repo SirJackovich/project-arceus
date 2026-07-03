@@ -1,0 +1,12 @@
+{
+  "name": "project-arceus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CLI-first Pokemon TCG Live coaching analysis tools.",
+  "type": "module",
+  "scripts": {
+    "build:workbook": "node scripts/build_workbook.mjs"
+  },
+  "dependencies": {}
+}
+

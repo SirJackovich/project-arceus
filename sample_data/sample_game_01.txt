@@ -1,0 +1,166 @@
+Setup
+Maudex chose tails for the opening coin flip.
+SirJackovich won the coin toss.
+SirJackovich decided to go first.
+Maudex drew 7 cards for the opening hand.
+- 7 drawn cards.
+SirJackovich drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Basic Fighting Energy, Mankey, Fighting Gong, Poké Pad, Annihilape, Rare Candy, Hawlucha
+Maudex played Staryu to the Active Spot.
+Maudex played Froakie to the Bench.
+SirJackovich played Hawlucha to the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Basic Fighting Energy.
+SirJackovich played Mankey to the Bench.
+SirJackovich played Fighting Gong.
+- SirJackovich drew Mankey.
+- SirJackovich shuffled their deck.
+SirJackovich played Mankey to the Bench.
+SirJackovich played Poké Pad.
+- SirJackovich drew Mankey.
+- SirJackovich shuffled their deck.
+SirJackovich played Mankey to the Bench.
+SirJackovich attached Basic Fighting Energy to Hawlucha in the Active Spot.
+SirJackovich ended their turn.
+
+Maudex's Turn
+Maudex drew a card.
+Maudex attached Basic Water Energy to Staryu in the Active Spot.
+Maudex played Boss's Orders.
+- SirJackovich's Mankey was switched with SirJackovich's Hawlucha to become the Active Pokémon.
+SirJackovich's Mankey is now in the Active Spot.
+Maudex's Staryu used Water Gun on SirJackovich’s Mankey for 20 damage.
+
+SirJackovich's Turn
+SirJackovich drew Tarragon.
+SirJackovich played Rare Candy.
+- SirJackovich evolved Mankey to Annihilape in the Active Spot.
+SirJackovich attached Basic Fighting Energy to Annihilape in the Active Spot.
+SirJackovich ended their turn.
+
+Maudex's Turn
+Maudex drew a card.
+Maudex evolved Staryu to Mega Starmie ex in the Active Spot.
+Maudex evolved Froakie to Frogadier on the Bench.
+Maudex attached Basic Water Energy to Mega Starmie ex in the Active Spot.
+Maudex played Lillie's Determination.
+- Maudex shuffled a card into their deck.
+- Maudex drew 8 cards.
+Maudex played Staryu to the Bench.
+Maudex's Mega Starmie ex used Jetting Blow on SirJackovich’s Annihilape for 120 damage.
+- SirJackovich's Hawlucha took 50 damage.
+
+SirJackovich's Turn
+SirJackovich drew Primeape.
+SirJackovich evolved Mankey to Primeape on the Bench.
+SirJackovich ended their turn.
+
+Maudex's Turn
+Maudex drew a card.
+Maudex played Boss's Orders.
+- SirJackovich's Primeape was switched with SirJackovich's Annihilape to become the Active Pokémon.
+SirJackovich's Primeape is now in the Active Spot.
+Maudex's Mega Starmie ex used Jetting Blow on SirJackovich’s Primeape for 120 damage.
+- SirJackovich's Annihilape took 50 damage.
+SirJackovich's Primeape was Knocked Out!
+Mankey was discarded from SirJackovich's Primeape.
+SirJackovich's Annihilape was Knocked Out!
+- 2 cards were discarded from SirJackovich's Annihilape.
+   • Basic Fighting Energy, Mankey
+Maudex took 2 Prize cards.
+A card was added to Maudex's hand.
+A card was added to Maudex's hand.
+SirJackovich's Hawlucha is now in the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Poké Pad.
+SirJackovich played Tarragon.
+- SirJackovich moved SirJackovich's 4 cards to their hand.
+   • Mankey, Mankey, Primeape, Basic Fighting Energy
+SirJackovich played Mankey to the Bench.
+SirJackovich played Mankey to the Bench.
+SirJackovich evolved Mankey to Primeape on the Bench.
+SirJackovich attached Basic Fighting Energy to Primeape on the Bench.
+SirJackovich played Poké Pad.
+- SirJackovich drew Primeape.
+- SirJackovich shuffled their deck.
+SirJackovich's Hawlucha used Vengeful Kick on Maudex’s Mega Starmie ex for 30 damage.
+
+Maudex's Turn
+Maudex drew a card.
+Maudex attached Basic Water Energy to Frogadier on the Bench.
+Maudex played Ultra Ball.
+- Maudex discarded 2 cards.
+   • Rare Candy, Rare Candy
+- Maudex drew Mega Greninja ex.
+- Maudex shuffled their deck.
+Maudex evolved Frogadier to Mega Greninja ex on the Bench.
+Maudex's Mega Starmie ex used Jetting Blow on SirJackovich’s Hawlucha for 120 damage.
+- SirJackovich's Mankey took 50 damage.
+SirJackovich's Hawlucha was Knocked Out!
+Basic Fighting Energy was discarded from SirJackovich's Hawlucha.
+Maudex took a Prize card.
+A card was added to Maudex's hand.
+SirJackovich's Primeape is now in the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Rare Candy.
+SirJackovich evolved Mankey to Primeape on the Bench.
+SirJackovich's Primeape used Drag Off on Maudex’s Staryu for 30 damage.
+- Maudex's Staryu was switched with Maudex's Mega Starmie ex to become the Active Pokémon.
+Maudex's Staryu is now in the Active Spot.
+
+Maudex's Turn
+Maudex drew a card.
+Maudex attached Air Balloon to Staryu in the Active Spot.
+Maudex attached Basic Water Energy to Mega Greninja ex on the Bench.
+Maudex retreated Staryu to the Bench.
+Maudex's Mega Starmie ex is now in the Active Spot.
+Maudex played Dawn.
+- Maudex drew 3 cards.
+   • Meowth ex, Mega Starmie ex, Mega Greninja ex
+- Maudex shuffled their deck.
+Maudex evolved Staryu to Mega Starmie ex on the Bench.
+Maudex's Mega Starmie ex used Jetting Blow on SirJackovich’s Primeape for 120 damage.
+- SirJackovich's Primeape took 50 damage.
+SirJackovich's Primeape was Knocked Out!
+- 2 cards were discarded from SirJackovich's Primeape.
+   • Basic Fighting Energy, Mankey
+Maudex took a Prize card.
+A card was added to Maudex's hand.
+SirJackovich's Primeape is now in the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Risky Ruins.
+SirJackovich played Risky Ruins to the Stadium spot.
+SirJackovich ended their turn.
+
+Maudex's Turn
+Maudex drew a card.
+Maudex attached Basic Water Energy to Mega Greninja ex on the Bench.
+Maudex's Mega Starmie ex used Jetting Blow on SirJackovich’s Primeape for 120 damage.
+- SirJackovich's Mankey took 50 damage.
+SirJackovich's Primeape was Knocked Out!
+Mankey was discarded from SirJackovich's Primeape.
+Maudex took a Prize card.
+A card was added to Maudex's hand.
+SirJackovich's Mankey is now in the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Annihilape.
+SirJackovich played Rare Candy.
+- SirJackovich evolved Mankey to Annihilape in the Active Spot.
+SirJackovich ended their turn.
+
+Maudex's Turn
+Maudex drew a card.
+Maudex attached Neo Upper Energy to Mega Starmie ex in the Active Spot.
+Maudex's Mega Starmie ex used Nebula Beam on SirJackovich’s Annihilape for 210 damage.
+SirJackovich's Annihilape was Knocked Out!
+Mankey was discarded from SirJackovich's Annihilape.
+Maudex took a Prize card.
+A card was added to Maudex's hand.
+Opponent Knocked Out all your Pokémon in play and took all their Prize cards. Maudex wins.
+

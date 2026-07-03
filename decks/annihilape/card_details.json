@@ -1,0 +1,1212 @@
+{
+  "source": "https://api.pokemontcg.io/v2/cards",
+  "deck": "Monkey Deck",
+  "cards": [
+    {
+      "deck_count": 4,
+      "deck_category": "Pokemon",
+      "requested_name": "Mankey",
+      "name": "Mankey",
+      "id": "sv10-90",
+      "supertype": "Pokémon",
+      "subtypes": [
+        "Basic"
+      ],
+      "hp": "70",
+      "types": [
+        "Fighting"
+      ],
+      "evolves_from": "",
+      "evolves_to": [
+        "Primeape"
+      ],
+      "rules": [],
+      "abilities": [],
+      "attacks": [
+        {
+          "name": "Wild Kick",
+          "cost": [
+            "Fighting"
+          ],
+          "converted_energy_cost": 1,
+          "damage": "30",
+          "text": "Flip a coin. If tails, this attack does nothing."
+        }
+      ],
+      "weaknesses": [
+        {
+          "type": "Psychic",
+          "value": "×2"
+        }
+      ],
+      "resistances": [],
+      "retreat_cost": [
+        "Colorless"
+      ],
+      "converted_retreat_cost": 1,
+      "set": {
+        "id": "sv10",
+        "name": "Destined Rivals",
+        "ptcgo_code": "DRI",
+        "release_date": "2025/05/30"
+      },
+      "number": "90",
+      "rarity": "Common",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/sv10/90.png",
+        "large": "https://images.pokemontcg.io/sv10/90_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 3,
+      "deck_category": "Pokemon",
+      "requested_name": "Primeape",
+      "name": "Primeape",
+      "id": "sv10-91",
+      "supertype": "Pokémon",
+      "subtypes": [
+        "Stage 1"
+      ],
+      "hp": "110",
+      "types": [
+        "Fighting"
+      ],
+      "evolves_from": "Mankey",
+      "evolves_to": [],
+      "rules": [],
+      "abilities": [],
+      "attacks": [
+        {
+          "name": "Drag Off",
+          "cost": [
+            "Fighting"
+          ],
+          "converted_energy_cost": 1,
+          "damage": "",
+          "text": "Switch in 1 of your opponent's Benched Pokémon to the Active Spot. This attack does 30 damage to the new Active Pokémon."
+        }
+      ],
+      "weaknesses": [
+        {
+          "type": "Psychic",
+          "value": "×2"
+        }
+      ],
+      "resistances": [],
+      "retreat_cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "converted_retreat_cost": 2,
+      "set": {
+        "id": "sv10",
+        "name": "Destined Rivals",
+        "ptcgo_code": "DRI",
+        "release_date": "2025/05/30"
+      },
+      "number": "91",
+      "rarity": "Common",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/sv10/91.png",
+        "large": "https://images.pokemontcg.io/sv10/91_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 3,
+      "deck_category": "Pokemon",
+      "requested_name": "Annihilape",
+      "name": "Annihilape",
+      "id": "sv10-92",
+      "supertype": "Pokémon",
+      "subtypes": [
+        "Stage 2"
+      ],
+      "hp": "150",
+      "types": [
+        "Fighting"
+      ],
+      "evolves_from": "Primeape",
+      "evolves_to": [],
+      "rules": [],
+      "abilities": [
+        {
+          "name": "Lose Cool",
+          "type": "Ability",
+          "text": "If this Pokémon has 2 or more damage counters on it, attacks used by this Pokémon do 120 more damage to your opponent's Active Pokémon (before applying Weakness and Resistance)."
+        }
+      ],
+      "attacks": [
+        {
+          "name": "Impact Blow",
+          "cost": [
+            "Fighting",
+            "Fighting"
+          ],
+          "converted_energy_cost": 2,
+          "damage": "160",
+          "text": "During your next turn, this Pokémon can't use Impact Blow."
+        }
+      ],
+      "weaknesses": [
+        {
+          "type": "Psychic",
+          "value": "×2"
+        }
+      ],
+      "resistances": [],
+      "retreat_cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "converted_retreat_cost": 2,
+      "set": {
+        "id": "sv10",
+        "name": "Destined Rivals",
+        "ptcgo_code": "DRI",
+        "release_date": "2025/05/30"
+      },
+      "number": "92",
+      "rarity": "Rare",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/sv10/92.png",
+        "large": "https://images.pokemontcg.io/sv10/92_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 1,
+      "deck_category": "Pokemon",
+      "requested_name": "Relicanth",
+      "name": "Relicanth",
+      "id": "sv5-84",
+      "supertype": "Pokémon",
+      "subtypes": [
+        "Basic"
+      ],
+      "hp": "100",
+      "types": [
+        "Fighting"
+      ],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [],
+      "abilities": [
+        {
+          "name": "Memory Dive",
+          "type": "Ability",
+          "text": "Each of your evolved Pokémon can use any attack from its previous Evolutions. (You still need the necessary Energy to use each attack.)"
+        }
+      ],
+      "attacks": [
+        {
+          "name": "Razor Fin",
+          "cost": [
+            "Fighting",
+            "Colorless"
+          ],
+          "converted_energy_cost": 2,
+          "damage": "30",
+          "text": ""
+        }
+      ],
+      "weaknesses": [
+        {
+          "type": "Grass",
+          "value": "×2"
+        }
+      ],
+      "resistances": [],
+      "retreat_cost": [
+        "Colorless"
+      ],
+      "converted_retreat_cost": 1,
+      "set": {
+        "id": "sv5",
+        "name": "Temporal Forces",
+        "ptcgo_code": "TEF",
+        "release_date": "2024/03/22"
+      },
+      "number": "84",
+      "rarity": "Rare",
+      "regulation_mark": "H",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/sv5/84.png",
+        "large": "https://images.pokemontcg.io/sv5/84_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark H"
+    },
+    {
+      "deck_count": 1,
+      "deck_category": "Pokemon",
+      "requested_name": "Fezandipiti ex",
+      "name": "Fezandipiti ex",
+      "id": "me2pt5-142",
+      "supertype": "Pokémon",
+      "subtypes": [
+        "Basic",
+        "ex"
+      ],
+      "hp": "210",
+      "types": [
+        "Darkness"
+      ],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Pokémon ex rule: When your Pokémon ex is Knocked Out, your opponent takes 2 Prize cards."
+      ],
+      "abilities": [
+        {
+          "name": "Flip the Script",
+          "type": "Ability",
+          "text": "Once during your turn, if any of your Pokémon were Knocked Out during your opponent's last turn, you may draw 3 cards. You can't use more than 1 Flip the Script Ability each turn."
+        }
+      ],
+      "attacks": [
+        {
+          "name": "Cruel Arrow",
+          "cost": [
+            "Colorless",
+            "Colorless",
+            "Colorless"
+          ],
+          "converted_energy_cost": 3,
+          "damage": "",
+          "text": "This attack does 100 damage to 1 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+        }
+      ],
+      "weaknesses": [
+        {
+          "type": "Fighting",
+          "value": "×2"
+        }
+      ],
+      "resistances": [],
+      "retreat_cost": [
+        "Colorless"
+      ],
+      "converted_retreat_cost": 1,
+      "set": {
+        "id": "me2pt5",
+        "name": "Ascended Heroes",
+        "ptcgo_code": "ASC",
+        "release_date": "2026/01/30"
+      },
+      "number": "142",
+      "rarity": "Double Rare",
+      "regulation_mark": "H",
+      "legalities": {
+        "standard": "Legal",
+        "unlimited": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.scrydex.com/pokemon/me2pt5-142/small",
+        "large": "https://images.scrydex.com/pokemon/me2pt5-142/large"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark H"
+    },
+    {
+      "deck_count": 2,
+      "deck_category": "Pokemon",
+      "requested_name": "Hawlucha",
+      "name": "Hawlucha",
+      "id": "me3-46",
+      "supertype": "Pokémon",
+      "subtypes": [
+        "Basic"
+      ],
+      "hp": "70",
+      "types": [
+        "Fighting"
+      ],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [],
+      "abilities": [],
+      "attacks": [
+        {
+          "name": "Vengeful Kick",
+          "cost": [
+            "Fighting"
+          ],
+          "converted_energy_cost": 1,
+          "damage": "30+",
+          "text": "If your Benched Pokémon have any damage counters on them, this attack does 60 more damage."
+        }
+      ],
+      "weaknesses": [
+        {
+          "type": "Psychic",
+          "value": "×2"
+        }
+      ],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me3",
+        "name": "Perfect Order",
+        "ptcgo_code": "POR",
+        "release_date": "2026/03/27"
+      },
+      "number": "46",
+      "rarity": "Common",
+      "regulation_mark": "J",
+      "legalities": {
+        "standard": "Not Legal",
+        "unlimited": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.scrydex.com/pokemon/me3-46/small",
+        "large": "https://images.scrydex.com/pokemon/me3-46/large"
+      },
+      "api_standard_legality": "Not Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark J"
+    },
+    {
+      "deck_count": 1,
+      "deck_category": "Pokemon",
+      "requested_name": "Annihilape",
+      "name": "Annihilape",
+      "id": "sv8-100",
+      "supertype": "Pokémon",
+      "subtypes": [
+        "Stage 2"
+      ],
+      "hp": "140",
+      "types": [
+        "Fighting"
+      ],
+      "evolves_from": "Primeape",
+      "evolves_to": [],
+      "rules": [],
+      "abilities": [],
+      "attacks": [
+        {
+          "name": "Tantrum",
+          "cost": [
+            "Fighting"
+          ],
+          "converted_energy_cost": 1,
+          "damage": "130",
+          "text": "This Pokémon is now Confused."
+        },
+        {
+          "name": "Destined Fight",
+          "cost": [
+            "Fighting",
+            "Colorless"
+          ],
+          "converted_energy_cost": 2,
+          "damage": "",
+          "text": "Both Active Pokémon are Knocked Out."
+        }
+      ],
+      "weaknesses": [
+        {
+          "type": "Psychic",
+          "value": "×2"
+        }
+      ],
+      "resistances": [],
+      "retreat_cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "converted_retreat_cost": 2,
+      "set": {
+        "id": "sv8",
+        "name": "Surging Sparks",
+        "ptcgo_code": "SSP",
+        "release_date": "2024/11/08"
+      },
+      "number": "100",
+      "rarity": "Uncommon",
+      "regulation_mark": "H",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/sv8/100.png",
+        "large": "https://images.pokemontcg.io/sv8/100_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark H"
+    },
+    {
+      "deck_count": 4,
+      "deck_category": "Trainer",
+      "requested_name": "Risky Ruins",
+      "name": "Risky Ruins",
+      "id": "me1-127",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Stadium"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Whenever any player puts a Basic non-Darkness Pokémon onto their Bench during their turn, place 2 damage counters on that Pokémon.",
+        "You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me1",
+        "name": "Mega Evolution",
+        "ptcgo_code": "MEG",
+        "release_date": "2025/09/26"
+      },
+      "number": "127",
+      "rarity": "Uncommon",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/me1/127.png",
+        "large": "https://images.pokemontcg.io/me1/127_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 2,
+      "deck_category": "Trainer",
+      "requested_name": "Pokegear 3.0",
+      "name": "Pokégear 3.0",
+      "id": "zsv10pt5-84",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Item"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Look at the top 7 cards of your deck. You may reveal a Supporter card you find there and put it into your hand. Shuffle the other cards back into your deck.",
+        "You may play any number of Item cards during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "zsv10pt5",
+        "name": "Black Bolt",
+        "ptcgo_code": "BLK",
+        "release_date": "2025/07/18"
+      },
+      "number": "84",
+      "rarity": "Uncommon",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/zsv10pt5/84.png",
+        "large": "https://images.pokemontcg.io/zsv10pt5/84_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 1,
+      "deck_category": "Trainer",
+      "requested_name": "Rare Candy",
+      "name": "Rare Candy",
+      "id": "me1-125",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Item"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Choose 1 of your Basic Pokémon in play. If you have a Stage 2 card in your hand that evolves from that Pokémon, put that card onto the Basic Pokémon to evolve it, skipping the Stage 1. You can't use this card during your first turn or on a Basic Pokémon that was put into play this turn.",
+        "You may play any number of Item cards during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me1",
+        "name": "Mega Evolution",
+        "ptcgo_code": "MEG",
+        "release_date": "2025/09/26"
+      },
+      "number": "125",
+      "rarity": "Common",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/me1/125.png",
+        "large": "https://images.pokemontcg.io/me1/125_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 3,
+      "deck_category": "Trainer",
+      "requested_name": "Buddy-Buddy Poffin",
+      "name": "Buddy-Buddy Poffin",
+      "id": "sv5-144",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Item"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Search your deck for up to 2 Basic Pokémon with 70 HP or less and put them onto your Bench. Then, shuffle your deck.",
+        "You may play any number of Item cards during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "sv5",
+        "name": "Temporal Forces",
+        "ptcgo_code": "TEF",
+        "release_date": "2024/03/22"
+      },
+      "number": "144",
+      "rarity": "Uncommon",
+      "regulation_mark": "H",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/sv5/144.png",
+        "large": "https://images.pokemontcg.io/sv5/144_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark H"
+    },
+    {
+      "deck_count": 3,
+      "deck_category": "Trainer",
+      "requested_name": "Lillie's Determination",
+      "name": "Lillie's Determination",
+      "id": "me1-119",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Supporter"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Shuffle your hand into your deck. Then, draw 6 cards. If you have exactly 6 Prize cards remaining, draw 8 cards instead.",
+        "You may play only 1 Supporter card during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me1",
+        "name": "Mega Evolution",
+        "ptcgo_code": "MEG",
+        "release_date": "2025/09/26"
+      },
+      "number": "119",
+      "rarity": "Uncommon",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/me1/119.png",
+        "large": "https://images.pokemontcg.io/me1/119_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 2,
+      "deck_category": "Trainer",
+      "requested_name": "Poke Pad",
+      "name": "Poké Pad",
+      "id": "me3-81",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Item"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Search your deck for a Pokémon that doesn't have a Rule Box, reveal it, and put it into your hand. Then, shuffle your deck. (Pokémon ex, Pokémon V, etc. have Rule Boxes.)",
+        "You may play any number of Item cards during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me3",
+        "name": "Perfect Order",
+        "ptcgo_code": "POR",
+        "release_date": "2026/03/27"
+      },
+      "number": "81",
+      "rarity": "Uncommon",
+      "regulation_mark": "J",
+      "legalities": {
+        "standard": "Not Legal",
+        "unlimited": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.scrydex.com/pokemon/me3-81/small",
+        "large": "https://images.scrydex.com/pokemon/me3-81/large"
+      },
+      "api_standard_legality": "Not Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark J"
+    },
+    {
+      "deck_count": 4,
+      "deck_category": "Trainer",
+      "requested_name": "Fighting Gong",
+      "name": "Fighting Gong",
+      "id": "me1-116",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Item"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Search your deck for a Basic Fighting Energy card or a Basic Fighting Pokémon, reveal it, and put it into your hand. Then, shuffle your deck.",
+        "You may play any number of Item cards during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me1",
+        "name": "Mega Evolution",
+        "ptcgo_code": "MEG",
+        "release_date": "2025/09/26"
+      },
+      "number": "116",
+      "rarity": "Uncommon",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/me1/116.png",
+        "large": "https://images.pokemontcg.io/me1/116_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 1,
+      "deck_category": "Trainer",
+      "requested_name": "Night Stretcher",
+      "name": "Night Stretcher",
+      "id": "sv6pt5-61",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Item"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Put a Pokémon or a Basic Energy card from your discard pile into your hand.",
+        "You may play any number of Item cards during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "sv6pt5",
+        "name": "Shrouded Fable",
+        "ptcgo_code": "SFA",
+        "release_date": "2024/08/02"
+      },
+      "number": "61",
+      "rarity": "Uncommon",
+      "regulation_mark": "H",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/sv6pt5/61.png",
+        "large": "https://images.pokemontcg.io/sv6pt5/61_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark H"
+    },
+    {
+      "deck_count": 2,
+      "deck_category": "Trainer",
+      "requested_name": "Energy Switch",
+      "name": "Energy Switch",
+      "id": "me1-115",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Item"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Move a Basic Energy from 1 of your Pokémon to another of your Pokémon.",
+        "You may play any number of Item cards during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me1",
+        "name": "Mega Evolution",
+        "ptcgo_code": "MEG",
+        "release_date": "2025/09/26"
+      },
+      "number": "115",
+      "rarity": "Common",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/me1/115.png",
+        "large": "https://images.pokemontcg.io/me1/115_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 2,
+      "deck_category": "Trainer",
+      "requested_name": "Colress's Tenacity",
+      "name": "Colress's Tenacity",
+      "id": "sv6pt5-57",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Supporter"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Search your deck for a Stadium card and an Energy card, reveal them, and put them into your hand. Then, shuffle your deck.",
+        "You may play only 1 Supporter card during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "sv6pt5",
+        "name": "Shrouded Fable",
+        "ptcgo_code": "SFA",
+        "release_date": "2024/08/02"
+      },
+      "number": "57",
+      "rarity": "Uncommon",
+      "regulation_mark": "H",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/sv6pt5/57.png",
+        "large": "https://images.pokemontcg.io/sv6pt5/57_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark H"
+    },
+    {
+      "deck_count": 1,
+      "deck_category": "Trainer",
+      "requested_name": "Air Balloon",
+      "name": "Air Balloon",
+      "id": "me1-166",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Pokémon Tool"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "The Retreat Cost of the Pokémon this card is attached to is ColorlessColorless less.",
+        "You may attach any number of Pokémon Tools to your Pokémon during your turn. You may attach only 1 Pokémon Tool to each Pokémon, and it stays attached."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me1",
+        "name": "Mega Evolution",
+        "ptcgo_code": "MEG",
+        "release_date": "2025/09/26"
+      },
+      "number": "166",
+      "rarity": "Ultra Rare",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/me1/166.png",
+        "large": "https://images.pokemontcg.io/me1/166_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 2,
+      "deck_category": "Trainer",
+      "requested_name": "Waitress",
+      "name": "Waitress",
+      "id": "me2pt5-215",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Supporter"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Look at the top 6 cards of your deck and attach a Basic Energy card you find there to 1 of your Pokémon. Shuffle the other cards back into your deck.",
+        "You may play only 1 Supporter card during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me2pt5",
+        "name": "Ascended Heroes",
+        "ptcgo_code": "ASC",
+        "release_date": "2026/01/30"
+      },
+      "number": "215",
+      "rarity": "Common",
+      "regulation_mark": "J",
+      "legalities": {
+        "standard": "Not Legal",
+        "unlimited": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.scrydex.com/pokemon/me2pt5-215/small",
+        "large": "https://images.scrydex.com/pokemon/me2pt5-215/large"
+      },
+      "api_standard_legality": "Not Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark J"
+    },
+    {
+      "deck_count": 3,
+      "deck_category": "Trainer",
+      "requested_name": "Dawn",
+      "name": "Dawn",
+      "id": "me2-87",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Supporter"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Search your deck for a Basic Pokémon, a Stage 1 Pokémon, and a Stage 2 Pokémon, reveal them, and put them into your hand. Then, shuffle your deck.",
+        "You may play only 1 Supporter card during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me2",
+        "name": "Phantasmal Flames",
+        "ptcgo_code": "PFL",
+        "release_date": "2025/11/14"
+      },
+      "number": "87",
+      "rarity": "Uncommon",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/me2/87.png",
+        "large": "https://images.pokemontcg.io/me2/87_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 2,
+      "deck_category": "Trainer",
+      "requested_name": "Tarragon",
+      "name": "Tarragon",
+      "id": "me3-85",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Supporter"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Put up to 4 in any combination of Fighting Pokémon and Basic Fighting Energy cards from your discard pile into your hand.",
+        "You may play only 1 Supporter card during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "me3",
+        "name": "Perfect Order",
+        "ptcgo_code": "POR",
+        "release_date": "2026/03/27"
+      },
+      "number": "85",
+      "rarity": "Uncommon",
+      "regulation_mark": "J",
+      "legalities": {
+        "standard": "Not Legal",
+        "unlimited": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.scrydex.com/pokemon/me3-85/small",
+        "large": "https://images.scrydex.com/pokemon/me3-85/large"
+      },
+      "api_standard_legality": "Not Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark J"
+    },
+    {
+      "deck_count": 2,
+      "deck_category": "Trainer",
+      "requested_name": "Hilda",
+      "name": "Hilda",
+      "id": "rsv10pt5-84",
+      "supertype": "Trainer",
+      "subtypes": [
+        "Supporter"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [
+        "Search your deck for an Evolution Pokémon and an Energy card, reveal them, and put them into your hand. Then, shuffle your deck.",
+        "You may play only 1 Supporter card during your turn."
+      ],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "rsv10pt5",
+        "name": "White Flare",
+        "ptcgo_code": "WHT",
+        "release_date": "2025/07/18"
+      },
+      "number": "84",
+      "rarity": "Uncommon",
+      "regulation_mark": "I",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/rsv10pt5/84.png",
+        "large": "https://images.pokemontcg.io/rsv10pt5/84_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "regulation mark I"
+    },
+    {
+      "deck_count": 11,
+      "deck_category": "Energy",
+      "requested_name": "Basic {F} Energy",
+      "name": "Basic Fighting Energy",
+      "id": "sve-6",
+      "supertype": "Energy",
+      "subtypes": [
+        "Basic"
+      ],
+      "hp": "",
+      "types": [],
+      "evolves_from": "",
+      "evolves_to": [],
+      "rules": [],
+      "abilities": [],
+      "attacks": [],
+      "weaknesses": [],
+      "resistances": [],
+      "retreat_cost": [],
+      "converted_retreat_cost": "",
+      "set": {
+        "id": "sve",
+        "name": "Scarlet & Violet Energies",
+        "ptcgo_code": "",
+        "release_date": "2023/03/31"
+      },
+      "number": "6",
+      "rarity": "Common",
+      "regulation_mark": "",
+      "legalities": {
+        "unlimited": "Legal",
+        "standard": "Legal",
+        "expanded": "Legal"
+      },
+      "images": {
+        "small": "https://images.pokemontcg.io/sve/6.png",
+        "large": "https://images.pokemontcg.io/sve/6_hires.png"
+      },
+      "api_standard_legality": "Legal",
+      "standard_legal_by_regulation_mark": true,
+      "standard_legality_basis": "Basic Energy with API Standard legality"
+    }
+  ],
+  "missing": []
+}

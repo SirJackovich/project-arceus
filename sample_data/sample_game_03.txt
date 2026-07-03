@@ -1,0 +1,151 @@
+Setup
+Bigsalsa72 chose tails for the opening coin flip.
+SirJackovich won the coin toss.
+SirJackovich decided to go first.
+Bigsalsa72 drew 7 cards for the opening hand.
+- 7 drawn cards.
+SirJackovich drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Fighting Gong, Risky Ruins, Rare Candy, Basic Fighting Energy, Basic Fighting Energy, Fezandipiti ex, Basic Fighting Energy
+Bigsalsa72 played Teal Mask Ogerpon ex to the Active Spot.
+SirJackovich played Fezandipiti ex to the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Basic Fighting Energy.
+SirJackovich played Risky Ruins to the Stadium spot.
+SirJackovich played Fighting Gong.
+- SirJackovich drew Mankey.
+- SirJackovich shuffled their deck.
+SirJackovich played Mankey to the Bench.
+Risky Ruins was activated.
+- SirJackovich put 2 damage counters on SirJackovich's Mankey.
+SirJackovich attached Basic Fighting Energy to Fezandipiti ex in the Active Spot.
+SirJackovich retreated Fezandipiti ex to the Bench.
+- Basic Fighting Energy was discarded from SirJackovich's Fezandipiti ex.
+SirJackovich's Mankey is now in the Active Spot.
+SirJackovich ended their turn.
+
+Bigsalsa72's Turn
+Bigsalsa72 drew a card.
+Bigsalsa72 played Poké Pad.
+- Bigsalsa72 drew Celebi.
+- Bigsalsa72 shuffled their deck.
+Bigsalsa72 played Bug Catching Set.
+- Bigsalsa72 drew 2 cards.
+   • Chikorita, Bulbasaur
+- Bigsalsa72 shuffled their deck.
+Bigsalsa72 played Bulbasaur to the Bench.
+Risky Ruins was activated.
+- Bigsalsa72 put 2 damage counters on SirJackovich's Bulbasaur.
+Bigsalsa72 played Forest of Vitality to the Stadium spot.
+- Bigsalsa72 discarded Risky Ruins.
+Bigsalsa72 played Chikorita to the Bench.
+Bigsalsa72 played Celebi to the Bench.
+Bigsalsa72 played Lillie's Determination.
+- Bigsalsa72 shuffled 3 cards into their deck.
+- Bigsalsa72 drew 8 cards.
+Bigsalsa72's Teal Mask Ogerpon ex used Teal Dance.
+- Bigsalsa72 attached Basic Grass Energy to Teal Mask Ogerpon ex in the Active Spot.
+- Bigsalsa72 drew a card.
+Bigsalsa72 attached Basic Grass Energy to Celebi on the Bench.
+Bigsalsa72 retreated Teal Mask Ogerpon ex to the Bench.
+- Basic Grass Energy was discarded from Bigsalsa72's Teal Mask Ogerpon ex.
+Bigsalsa72's Celebi is now in the Active Spot.
+Bigsalsa72's Celebi used Traverse Time.
+- Bigsalsa72 drew 3 cards.
+   • Ivysaur, Teal Mask Ogerpon ex, Forest of Vitality
+- Bigsalsa72 shuffled their deck.
+
+SirJackovich's Turn
+SirJackovich drew Tarragon.
+SirJackovich attached Basic Fighting Energy to Mankey in the Active Spot.
+SirJackovich's Mankey used Wild Kick on Bigsalsa72’s Celebi for 30 damage.
+- SirJackovich flipped a coin and it landed on heads.
+
+Bigsalsa72's Turn
+Bigsalsa72 drew a card.
+Bigsalsa72's Teal Mask Ogerpon ex used Teal Dance.
+- Bigsalsa72 attached Basic Grass Energy to Teal Mask Ogerpon ex on the Bench.
+- Bigsalsa72 drew a card.
+Bigsalsa72 played Teal Mask Ogerpon ex to the Bench.
+Bigsalsa72's Teal Mask Ogerpon ex used Teal Dance.
+- Bigsalsa72 attached Basic Grass Energy to Teal Mask Ogerpon ex on the Bench.
+- Bigsalsa72 drew a card.
+Bigsalsa72 evolved Chikorita to Bayleef on the Bench.
+Bigsalsa72 evolved Bulbasaur to Ivysaur on the Bench.
+Bigsalsa72 evolved Ivysaur to Mega Venusaur ex on the Bench.
+Bigsalsa72 evolved Bayleef to Meganium on the Bench.
+Bigsalsa72 played Lillie's Determination.
+- Bigsalsa72 shuffled 5 cards into their deck.
+- Bigsalsa72 drew 8 cards.
+Bigsalsa72 played Chikorita to the Bench.
+Bigsalsa72 played Bug Catching Set.
+- Bigsalsa72 drew 2 cards.
+   • Bayleef, Basic Grass Energy
+- Bigsalsa72 shuffled their deck.
+Bigsalsa72 evolved Chikorita to Bayleef on the Bench.
+Bigsalsa72 attached Basic Grass Energy to Mega Venusaur ex on the Bench.
+Bigsalsa72's Celebi used Traverse Time.
+- Bigsalsa72 drew 3 cards.
+   • Mega Meganium ex, Teal Mask Ogerpon ex, Bayleef
+- Bigsalsa72 shuffled their deck.
+
+SirJackovich's Turn
+SirJackovich drew Primeape.
+SirJackovich evolved Mankey to Primeape in the Active Spot.
+SirJackovich attached Basic Fighting Energy to Primeape in the Active Spot.
+SirJackovich's Primeape used Drag Off on Bigsalsa72’s Bayleef for 30 damage.
+- Bigsalsa72's Bayleef was switched with Bigsalsa72's Celebi to become the Active Pokémon.
+Bigsalsa72's Bayleef is now in the Active Spot.
+
+Bigsalsa72's Turn
+Bigsalsa72 drew a card.
+Bigsalsa72 evolved Bayleef to Mega Meganium ex in the Active Spot.
+Bigsalsa72's Teal Mask Ogerpon ex used Teal Dance.
+- Bigsalsa72 attached Basic Grass Energy to Teal Mask Ogerpon ex on the Bench.
+- Bigsalsa72 drew a card.
+Bigsalsa72 played Boss's Orders.
+- SirJackovich's Fezandipiti ex was switched with SirJackovich's Primeape to become the Active Pokémon.
+SirJackovich's Fezandipiti ex is now in the Active Spot.
+Bigsalsa72's Mega Venusaur ex used Solar Transfer.
+- Bigsalsa72 attached Basic Grass Energy to Mega Meganium ex in the Active Spot.
+- Bigsalsa72 attached Basic Grass Energy to Mega Meganium ex in the Active Spot.
+- Bigsalsa72 attached Basic Grass Energy to Mega Meganium ex in the Active Spot.
+Bigsalsa72's Mega Meganium ex used Giant Bouquet on SirJackovich’s Fezandipiti ex for 370 damage.
+- Damage breakdown:
+   • Base damage: 70 damage
+   • 6 attached Energy: 300 damage
+   • Total damage: 370 damage
+
+SirJackovich's Fezandipiti ex was Knocked Out!
+Bigsalsa72 took 2 Prize cards.
+A card was added to Bigsalsa72's hand.
+A card was added to Bigsalsa72's hand.
+SirJackovich's Primeape is now in the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Basic Fighting Energy.
+SirJackovich's Primeape used Drag Off on Bigsalsa72’s Celebi for 30 damage.
+- Bigsalsa72's Celebi was switched with Bigsalsa72's Mega Meganium ex to become the Active Pokémon.
+Bigsalsa72's Celebi is now in the Active Spot.
+
+Bigsalsa72's Turn
+Bigsalsa72 drew a card.
+Bigsalsa72's Mega Venusaur ex used Solar Transfer.
+- Bigsalsa72 attached Basic Grass Energy to Celebi in the Active Spot.
+Bigsalsa72 retreated Celebi to the Bench.
+- Basic Grass Energy was discarded from Bigsalsa72's Celebi.
+Bigsalsa72's Mega Meganium ex is now in the Active Spot.
+Bigsalsa72's Mega Meganium ex used Giant Bouquet on SirJackovich’s Primeape for 370 damage.
+- Damage breakdown:
+   • Base damage: 70 damage
+   • 6 attached Energy: 300 damage
+   • Total damage: 370 damage
+
+SirJackovich's Primeape was Knocked Out!
+- 3 cards were discarded from SirJackovich's Primeape.
+   • Basic Fighting Energy, Basic Fighting Energy, Mankey
+Bigsalsa72 took a Prize card.
+A card was added to Bigsalsa72's hand.
+Knocked Out with no Benched Pokémon. Bigsalsa72 wins.
+

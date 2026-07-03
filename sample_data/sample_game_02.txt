@@ -1,0 +1,280 @@
+Setup
+SirJackovich chose tails for the opening coin flip.
+Bryan575 won the coin toss.
+Bryan575 decided to go second.
+SirJackovich drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Lillie's Determination, Fighting Gong, Waitress, Poké Pad, Mankey, Primeape, Pokégear 3.0
+Bryan575 drew 7 cards for the opening hand.
+- 7 drawn cards.
+SirJackovich played Mankey to the Active Spot.
+Bryan575 played Budew to the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Dawn.
+SirJackovich played Fighting Gong.
+- SirJackovich drew Basic Fighting Energy.
+- SirJackovich shuffled their deck.
+SirJackovich attached Basic Fighting Energy to Mankey in the Active Spot.
+SirJackovich played Poké Pad.
+- SirJackovich drew Mankey.
+- SirJackovich shuffled their deck.
+SirJackovich played Mankey to the Bench.
+SirJackovich played Pokégear 3.0.
+- SirJackovich drew Colress's Tenacity.
+- SirJackovich shuffled their deck.
+SirJackovich ended their turn.
+
+Bryan575's Turn
+Bryan575 drew a card.
+Bryan575 played Poké Pad.
+- Bryan575 drew N's Zorua.
+- Bryan575 shuffled their deck.
+Bryan575 played N's Zorua to the Bench.
+Bryan575 played N's Castle to the Stadium spot.
+Bryan575 played Lillie's Determination.
+- Bryan575 shuffled 4 cards into their deck.
+- Bryan575 drew 8 cards.
+Bryan575 played N's Zorua to the Bench.
+Bryan575 played N's Zekrom to the Bench.
+Bryan575 played N's Sigilyph to the Bench.
+Bryan575 played Poké Pad.
+- Bryan575 drew Munkidori.
+- Bryan575 shuffled their deck.
+Bryan575 played Munkidori to the Bench.
+Bryan575's Budew used Itchy Pollen on SirJackovich’s Mankey for 10 damage.
+
+SirJackovich's Turn
+SirJackovich drew Primeape.
+SirJackovich evolved Mankey to Primeape in the Active Spot.
+SirJackovich evolved Mankey to Primeape on the Bench.
+SirJackovich played Colress's Tenacity.
+- SirJackovich drew 2 cards.
+   • Risky Ruins, Basic Fighting Energy
+- SirJackovich shuffled their deck.
+SirJackovich attached Basic Fighting Energy to Primeape on the Bench.
+SirJackovich played Risky Ruins to the Stadium spot.
+- SirJackovich discarded N's Castle.
+SirJackovich's Primeape used Drag Off on Bryan575’s N's Zorua for 30 damage.
+- Bryan575's N's Zorua was switched with Bryan575's Budew to become the Active Pokémon.
+Bryan575's N's Zorua is now in the Active Spot.
+
+Bryan575's Turn
+Bryan575 drew a card.
+Bryan575 evolved N's Zorua to N's Zoroark ex on the Bench.
+Bryan575 played Lillie's Determination.
+- Bryan575 shuffled 3 cards into their deck.
+- Bryan575 drew 8 cards.
+Bryan575 attached Basic Darkness Energy to N's Zoroark ex on the Bench.
+Bryan575's N's Zoroark ex used Trade.
+- Bryan575 discarded Brock's Scouting.
+- Bryan575 drew 2 cards.
+Bryan575 attached Air Balloon to N's Zorua in the Active Spot.
+Bryan575 retreated N's Zorua to the Bench.
+Bryan575's Budew is now in the Active Spot.
+Bryan575's Budew used Itchy Pollen on SirJackovich’s Primeape for 10 damage.
+
+SirJackovich's Turn
+SirJackovich drew Fighting Gong.
+SirJackovich played Dawn.
+- SirJackovich drew 3 cards.
+   • Relicanth, Primeape, Annihilape
+- SirJackovich shuffled their deck.
+SirJackovich played Relicanth to the Bench.
+Risky Ruins was activated.
+- SirJackovich put 2 damage counters on SirJackovich's Relicanth.
+SirJackovich evolved Primeape to Annihilape in the Active Spot.
+SirJackovich's Annihilape used Wild Kick on Bryan575’s Budew for 150 damage.
+- Damage breakdown:
+   • Base damage: 30 damage
+   • (Ability) Lose Cool: 120 damage
+   • Total damage: 150 damage
+
+- SirJackovich flipped a coin and it landed on heads.
+Bryan575's Budew was Knocked Out!
+SirJackovich took a Prize card.
+Basic Fighting Energy was added to SirJackovich's hand.
+Bryan575's N's Zorua is now in the Active Spot.
+
+Bryan575's Turn
+Bryan575 drew a card.
+Bryan575 played N's Reshiram to the Bench.
+Risky Ruins was activated.
+- Bryan575 put 2 damage counters on SirJackovich's N's Reshiram.
+Bryan575's N's Zoroark ex used Trade.
+- Bryan575 discarded N's Zorua.
+- Bryan575 drew 2 cards.
+Bryan575 played Night Stretcher.
+- Bryan575 moved Bryan575's N's Zorua to their hand.
+Bryan575 played Lillie's Determination.
+- Bryan575 shuffled 7 cards into their deck.
+- Bryan575 drew 8 cards.
+Bryan575 attached Basic Darkness Energy to N's Zoroark ex on the Bench.
+Bryan575 evolved N's Zorua to N's Zoroark ex in the Active Spot.
+Bryan575's N's Zoroark ex used Trade.
+- Bryan575 discarded Rare Candy.
+- Bryan575 drew 2 cards.
+Bryan575 retreated N's Zoroark ex to the Bench.
+Bryan575's N's Zoroark ex is now in the Active Spot.
+Bryan575's N's Zoroark ex used Night Joker on SirJackovich’s Annihilape for 170 damage.
+- Bryan575 chose Virtuous Flame
+SirJackovich's Annihilape was Knocked Out!
+- 3 cards were discarded from SirJackovich's Annihilape.
+   • Basic Fighting Energy, Primeape, Mankey
+Bryan575 took a Prize card.
+A card was added to Bryan575's hand.
+SirJackovich's Primeape is now in the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Energy Switch.
+SirJackovich played Fighting Gong.
+- SirJackovich drew Mankey.
+- SirJackovich shuffled their deck.
+SirJackovich played Mankey to the Bench.
+Risky Ruins was activated.
+- SirJackovich put 2 damage counters on SirJackovich's Mankey.
+SirJackovich attached Basic Fighting Energy to Mankey on the Bench.
+SirJackovich played Waitress.
+- SirJackovich attached Basic Fighting Energy to Primeape in the Active Spot.
+- SirJackovich shuffled their deck.
+SirJackovich's Primeape used Drag Off on Bryan575’s N's Reshiram for 30 damage.
+- Bryan575's N's Reshiram was switched with Bryan575's N's Zoroark ex to become the Active Pokémon.
+Bryan575's N's Reshiram is now in the Active Spot.
+
+Bryan575's Turn
+Bryan575 drew a card.
+Bryan575 attached Basic Darkness Energy to N's Zoroark ex on the Bench.
+Bryan575's N's Zoroark ex used Trade.
+- Bryan575 discarded Lana's Aid.
+- Bryan575 drew 2 cards.
+Bryan575's N's Zoroark ex used Trade.
+- Bryan575 discarded Budew.
+- Bryan575 drew 2 cards.
+Bryan575 played Lillie's Determination.
+- Bryan575 shuffled 9 cards into their deck.
+- Bryan575 drew 6 cards.
+Bryan575 played Poké Pad.
+- Bryan575 drew N's Zekrom.
+- Bryan575 shuffled their deck.
+Bryan575 played Night Stretcher.
+- Bryan575 moved Bryan575's Budew to their hand.
+Bryan575 ended their turn.
+
+SirJackovich's Turn
+SirJackovich drew Lillie's Determination.
+SirJackovich evolved Mankey to Primeape on the Bench.
+SirJackovich played Lillie's Determination.
+- SirJackovich shuffled 2 cards into their deck.
+   • Lillie's Determination, Energy Switch
+- SirJackovich drew 6 cards.
+   • Basic Fighting Energy, Air Balloon, Energy Switch, Buddy-Buddy Poffin, Basic Fighting Energy, Tarragon
+SirJackovich played Buddy-Buddy Poffin.
+- SirJackovich drew 2 cards and played them to the Bench.
+   • Mankey, Hawlucha
+- SirJackovich shuffled their deck.
+Risky Ruins was activated.
+- SirJackovich put 2 damage counters on SirJackovich's Mankey.
+- SirJackovich put 2 damage counters on SirJackovich's Hawlucha.
+SirJackovich attached Basic Fighting Energy to Mankey on the Bench.
+SirJackovich attached Air Balloon to Primeape in the Active Spot.
+SirJackovich retreated Primeape to the Bench.
+SirJackovich's Hawlucha is now in the Active Spot.
+SirJackovich played Energy Switch.
+- SirJackovich attached Basic Fighting Energy to Hawlucha in the Active Spot.
+SirJackovich's Hawlucha used Vengeful Kick on Bryan575’s N's Reshiram for 90 damage.
+- Damage breakdown:
+   • Base damage: 30 damage
+   • 6 damage counters: 60 damage
+   • Total damage: 90 damage
+
+Bryan575's N's Reshiram was Knocked Out!
+SirJackovich took a Prize card.
+Dawn was added to SirJackovich's hand.
+Bryan575's N's Zoroark ex is now in the Active Spot.
+
+Bryan575's Turn
+Bryan575 drew a card.
+Bryan575 attached Basic Darkness Energy to N's Zoroark ex on the Bench.
+Bryan575 played Lana's Aid.
+- Bryan575 moved Bryan575's 2 cards to their hand.
+   • N's Reshiram, Budew
+Bryan575's N's Zoroark ex used Trade.
+- Bryan575 discarded N's Vanilluxe.
+- Bryan575 drew 2 cards.
+Bryan575's N's Zoroark ex used Trade.
+- Bryan575 discarded Basic Darkness Energy.
+- Bryan575 drew 2 cards.
+Bryan575's N's Zoroark ex used Night Joker on SirJackovich’s Hawlucha for 70 damage.
+- Bryan575 chose Shred
+SirJackovich's Hawlucha was Knocked Out!
+Basic Fighting Energy was discarded from SirJackovich's Hawlucha.
+Bryan575 took a Prize card.
+A card was added to Bryan575's hand.
+SirJackovich's Primeape is now in the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Hilda.
+SirJackovich played Tarragon.
+- SirJackovich moved SirJackovich's 4 cards to their hand.
+   • Annihilape, Primeape, Mankey, Basic Fighting Energy
+SirJackovich played Mankey to the Bench.
+Risky Ruins was activated.
+- SirJackovich put 2 damage counters on SirJackovich's Mankey.
+SirJackovich evolved Primeape to Annihilape in the Active Spot.
+SirJackovich evolved Mankey to Primeape on the Bench.
+SirJackovich attached Basic Fighting Energy to Annihilape in the Active Spot.
+SirJackovich's Annihilape used Impact Blow on Bryan575’s N's Zoroark ex for 280 damage.
+- Damage breakdown:
+   • Base damage: 160 damage
+   • (Ability) Lose Cool: 120 damage
+   • Total damage: 280 damage
+
+Bryan575's N's Zoroark ex was Knocked Out!
+- 3 cards were discarded from Bryan575's N's Zoroark ex.
+   • Basic Darkness Energy, Basic Darkness Energy, N's Zorua
+SirJackovich took 2 Prize cards.
+Lillie's Determination was added to SirJackovich's hand.
+Annihilape was added to SirJackovich's hand.
+Bryan575's N's Zoroark ex is now in the Active Spot.
+
+Bryan575's Turn
+Bryan575 drew a card.
+Bryan575 played N's Reshiram to the Bench.
+Risky Ruins was activated.
+- Bryan575 put 2 damage counters on SirJackovich's N's Reshiram.
+Bryan575's N's Zoroark ex used Night Joker on SirJackovich’s Annihilape for 170 damage.
+- Bryan575 chose Virtuous Flame
+SirJackovich's Annihilape was Knocked Out!
+- 4 cards were discarded from SirJackovich's Annihilape.
+   • Basic Fighting Energy, Basic Fighting Energy, Primeape, Mankey
+Bryan575 took a Prize card.
+A card was added to Bryan575's hand.
+SirJackovich's Primeape is now in the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Annihilape.
+SirJackovich evolved Primeape to Annihilape in the Active Spot.
+SirJackovich evolved Primeape to Annihilape on the Bench.
+SirJackovich attached Basic Fighting Energy to Annihilape in the Active Spot.
+SirJackovich played Dawn.
+- SirJackovich drew 2 cards.
+   • Fezandipiti ex, Annihilape
+- SirJackovich shuffled their deck.
+SirJackovich played Fezandipiti ex to the Bench.
+SirJackovich's Fezandipiti ex used Flip the Script.
+- SirJackovich drew 3 cards.
+   • Basic Fighting Energy, Tarragon, Colress's Tenacity
+SirJackovich's Annihilape used Destined Fight.
+Bryan575's N's Zoroark ex was Knocked Out!
+- 4 cards were discarded from Bryan575's N's Zoroark ex.
+   • Basic Darkness Energy, Basic Darkness Energy, N's Zorua, Air Balloon
+SirJackovich's Annihilape was Knocked Out!
+- 5 cards were discarded from SirJackovich's Annihilape.
+   • Basic Fighting Energy, Basic Fighting Energy, Primeape, Mankey, Air Balloon
+Bryan575 took a Prize card.
+A card was added to Bryan575's hand.
+SirJackovich took 2 Prize cards.
+Basic Fighting Energy was added to SirJackovich's hand.
+Night Stretcher was added to SirJackovich's hand.
+All Prize cards taken. SirJackovich wins.
+

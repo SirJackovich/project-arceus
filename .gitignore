@@ -1,0 +1,26 @@
+.DS_Store
+
+# Local match data and generated reports
+data/
+outputs/
+
+# Node/runtime artifacts
+node_modules/
+scripts/node_modules/
+npm-debug.log*
+
+# Python/runtime artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+

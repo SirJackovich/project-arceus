@@ -1,0 +1,3 @@
+# Project Arceus currently uses the Python standard library only.
+# Network card-detail refreshes shell out to curl.
+

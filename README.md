@@ -33,6 +33,12 @@ Intentionally out of scope for now:
 
 ## How To Run
 
+Import the latest pasted battle log and run the coach analysis:
+
+```bash
+python3 scripts/post_game.py
+```
+
 Import a pasted battle log:
 
 ```bash
@@ -68,6 +74,20 @@ Evaluate deck success conditions:
 python3 scripts/evaluate_success.py
 ```
 
+Generate a last-10-games coaching report:
+
+```bash
+python3 scripts/coach_report.py --last 10
+```
+
+The latest report is written to `data/analysis/coach_report.md` and each run also saves a timestamped copy in `data/coaching_sessions/`.
+
+Generate a single-game summary for the newest match:
+
+```bash
+python3 scripts/coach_report.py --game latest
+```
+
 Refresh card details:
 
 ```bash
@@ -83,9 +103,13 @@ node scripts/build_workbook.mjs
 Run the full local analysis flow:
 
 ```bash
-python3 scripts/analyze_logs.py
-python3 scripts/evaluate_success.py
-node scripts/build_workbook.mjs
+python3 scripts/run_analysis.py
+```
+
+Rebuild the workbook too:
+
+```bash
+python3 scripts/run_analysis.py --with-workbook
 ```
 
 Analyze only sample logs:
@@ -97,13 +121,13 @@ python3 scripts/analyze_logs.py --input-dir sample_data --output-dir /tmp/projec
 ## Example Workflow
 
 1. Copy the battle log from Pokemon TCG Live.
-2. Run `python3 scripts/import_log.py`.
+2. Run `python3 scripts/post_game.py`.
 3. Paste the battle log, then type `::END_LOG::` on its own line.
 4. Confirm the inferred opponent, result, first-player, and concession values.
 5. Answer the remaining metadata prompts for date, deck version, ranked points, and notes.
-6. Run the full local analysis flow.
-7. Open `data/analysis/monkey_deck_analysis.xlsx`.
-8. Review success-condition misses, attack usage, and card effectiveness.
+6. Let Project Arceus run the analysis pipeline.
+7. Review `data/analysis/coach_report.md`.
+8. Optionally run `python3 scripts/run_analysis.py --with-workbook` if you want the full workbook.
 9. Choose one experiment from `experiments/` or add a new one.
 
 ## Coaching Object

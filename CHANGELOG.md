@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.3.0
+
+- Added a one-command post-game flow with `scripts/post_game.py`.
+- Made the default coach report concise with Coach Grade, Biggest Strength, Biggest Weakness, and Today's Focus.
+- Made workbook generation opt-in with `scripts/run_analysis.py --with-workbook`.
+- Added timestamped coaching session snapshots under `data/coaching_sessions/`.
+- Added a CLI coaching report for the last N games.
+- Added single-game coach report support with `--game latest`.
+- Added a one-command local analysis pipeline with `scripts/run_analysis.py`.
+- Added a first-Annihilape-attack miss reason breakdown using log-derived heuristics.
+- Added deterministic coaching recommendations with observation, evidence, recommendation, confidence, and next experiment fields.
+- Added Markdown and JSON coach report outputs under `data/analysis/`.
+- Updated the README workflow to include the coach report step.
+
 ## v0.2.0
 
 - Added an interactive terminal log importer for pasted Pokemon TCG Live battle logs.

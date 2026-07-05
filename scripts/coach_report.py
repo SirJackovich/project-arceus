@@ -15,6 +15,28 @@ USAGE_TYPES = {
     "manual_attach", "attack", "use_ability", "activation", "retreat",
 }
 
+CARD_TRACKING_TYPES = {
+    "drawn": {"turn_draw_known", "known_drawn_card", "opening_hand"},
+    "played": {"play_card", "bench_pokemon", "active_pokemon", "stadium_play", "manual_attach", "evolve"},
+    "activated_triggered": {"activation", "use_ability", "attack"},
+    "searched_fetched": set(),
+    "discarded": {"discarded_card", "discard_effect", "knockout_received"},
+    "shuffled_back": {"shuffle_into_deck"},
+}
+
+SEARCH_FETCH_CARDS = {
+    "Buddy-Buddy Poffin",
+    "Fighting Gong",
+    "Pokegear 3.0",
+    "Pokégear 3.0",
+    "Poke Pad",
+    "Poké Pad",
+    "Colress's Tenacity",
+    "Tarragon",
+    "Hilda",
+    "Night Stretcher",
+}
+
 
 def read_csv(path):
     path = Path(path)
@@ -45,15 +67,30 @@ def snapshot_prefix(payload):
     return f"{timestamp}_{scope}"
 
 
-def write_report_outputs(args, rendered, payload):
-    write_text(args.output_md, rendered)
-    write_json(args.output_json, payload)
+def verbose_output_path(path):
+    path = Path(path)
+    return path.with_name(f"{path.stem}_verbose{path.suffix}")
+
+
+def report_payload(payload, report_type):
+    output = dict(payload)
+    output["report_type"] = report_type
+    return output
+
+
+def write_report_outputs(args, concise_rendered, verbose_rendered, payload):
+    write_text(args.output_md, concise_rendered)
+    write_json(args.output_json, report_payload(payload, "concise"))
+    write_text(verbose_output_path(args.output_md), verbose_rendered)
+    write_json(verbose_output_path(args.output_json), report_payload(payload, "verbose"))
     if args.no_snapshot:
         return
     snapshot_dir = Path(args.snapshot_dir)
     prefix = snapshot_prefix(payload)
-    write_text(snapshot_dir / f"{prefix}_coach_report.md", rendered)
-    write_json(snapshot_dir / f"{prefix}_coach_report.json", payload)
+    write_text(snapshot_dir / f"{prefix}_coach_report.md", concise_rendered)
+    write_json(snapshot_dir / f"{prefix}_coach_report.json", report_payload(payload, "concise"))
+    write_text(snapshot_dir / f"{prefix}_coach_report_verbose.md", verbose_rendered)
+    write_json(snapshot_dir / f"{prefix}_coach_report_verbose.json", report_payload(payload, "verbose"))
 
 
 def game_number(game_id):
@@ -251,7 +288,266 @@ def my_turn_index(event, mapping):
     return mapping.get(turn, 0)
 
 
-def annihilape_miss_reasons(events, selected_ids, success_rows):
+def group_events_by_game(events, selected_ids):
+    grouped = defaultdict(list)
+    for event in events:
+        if event.get("game_id") in selected_ids:
+            grouped[event.get("game_id")].append(event)
+    return grouped
+
+
+def hand_seen_cards(game_events):
+    cards = set()
+    for event in game_events:
+        if event.get("event_player") != MY_PLAYER:
+            continue
+        if event.get("event_type") in {"opening_hand", "turn_draw_known", "known_drawn_card"} and event.get("card_name"):
+            cards.add(canonical_name(event.get("card_name")))
+    return cards
+
+
+def card_tracking_summary(events, selected_ids, deck_cards):
+    selected = [row for row in events if row.get("game_id") in selected_ids]
+    mine = [row for row in selected if row.get("event_player") == MY_PLAYER]
+    tracking = defaultdict(lambda: Counter({
+        "drawn": 0,
+        "played": 0,
+        "activated_triggered": 0,
+        "searched_fetched": 0,
+        "discarded": 0,
+        "shuffled_back": 0,
+        "stuck_in_hand_unused": 0,
+    }))
+
+    for event in mine:
+        card = event.get("card_name")
+        source = event.get("source_card")
+        event_type = event.get("event_type")
+        if card:
+            for metric, event_types in CARD_TRACKING_TYPES.items():
+                if event_type in event_types:
+                    tracking[card][metric] += 1
+        if card and event_type == "known_drawn_card" and source in SEARCH_FETCH_CARDS:
+            tracking[card]["searched_fetched"] += 1
+        if source and source != card and event_type == "known_drawn_card" and source in SEARCH_FETCH_CARDS:
+            tracking[source]["searched_fetched"] += 1
+
+    grouped = group_events_by_game(events, selected_ids)
+    for game_events in grouped.values():
+        seen = hand_seen_cards(game_events)
+        played = {
+            canonical_name(event.get("card_name")) for event in game_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("card_name")
+            and event.get("event_type") in CARD_TRACKING_TYPES["played"] | CARD_TRACKING_TYPES["activated_triggered"]
+        }
+        for card in deck_cards:
+            if canonical_name(card) in seen and canonical_name(card) not in played:
+                tracking[card]["stuck_in_hand_unused"] += 1
+
+    rows = []
+    for card, counts in tracking.items():
+        rows.append({"card_name": card, **dict(counts)})
+    rows.sort(key=lambda row: (-row["played"], -row["activated_triggered"], -row["drawn"], row["card_name"]))
+    return rows
+
+
+def related_effect_details(game_events, source_event):
+    line_no = as_int(source_event.get("line_no"))
+    source_card = source_event.get("card_name")
+    turn = source_event.get("turn_number")
+    details = []
+    for event in game_events:
+        if event.get("turn_number") != turn:
+            continue
+        if as_int(event.get("line_no")) <= line_no:
+            continue
+        if event.get("event_type") == "attack":
+            break
+        if event.get("source_card") == source_card or event.get("event_type") in {"effect_detail", "knockout_received", "prize_taken"}:
+            details.append(event)
+    return details
+
+
+def annihilape_attack_quality(events, selected_games):
+    selected_ids = {game["game_id"] for game in selected_games}
+    grouped = group_events_by_game(events, selected_ids)
+    rows = []
+    for game in selected_games:
+        game_id = game["game_id"]
+        game_events = grouped[game_id]
+        mapping = my_turn_map(game_events)
+        attacks = [
+            event for event in game_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("event_type") == "attack"
+            and event.get("card_name") == "Annihilape"
+        ]
+        first = attacks[0] if attacks else None
+        details = related_effect_details(game_events, first) if first else []
+        detail_text = " ".join(event.get("raw_line", "") + " " + event.get("value", "") for event in details)
+        ko_taken = any(
+            event.get("event_type") == "knockout_received"
+            and event.get("source_card") == "Annihilape"
+            and event.get("event_player") != MY_PLAYER
+            for event in details
+        ) if first else False
+        damage = as_int(first.get("amount")) if first else 0
+        attack_name = first.get("value", "") if first else ""
+        rows.append({
+            "game": game_label(game_id),
+            "game_id": game_id,
+            "opponent": game.get("opponent", ""),
+            "first_attack_turn": my_turn_index(first, mapping) if first else "none",
+            "attack_name": attack_name or "none",
+            "damage_dealt": damage if first else "",
+            "lose_cool_active": "yes" if "Lose Cool" in detail_text else "no" if first else "unknown",
+            "ko_taken": "yes" if ko_taken else "no" if first else "unknown",
+            "full_power_impact_blow": "yes" if attack_name == "Impact Blow" and damage >= 280 else "no" if first else "unknown",
+        })
+    return rows
+
+
+def backup_attacker_summary(events, selected_games):
+    selected_ids = {game["game_id"] for game in selected_games}
+    grouped = group_events_by_game(events, selected_ids)
+    rows = []
+    for game in selected_games:
+        game_id = game["game_id"]
+        game_events = grouped[game_id]
+        mapping = my_turn_map(game_events)
+        ko_events = [
+            event for event in game_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("event_type") == "knockout_received"
+            and event.get("card_name") == "Annihilape"
+            and event.get("source_player") != MY_PLAYER
+        ]
+        if not ko_events:
+            rows.append({"game": game_label(game_id), "game_id": game_id, "state": "not tested", "evidence": "No opposing KO of first Annihilape."})
+            continue
+        ko = ko_events[0]
+        ko_turn = as_int(ko.get("turn_number"))
+        next_my_turns = sorted({
+            as_int(event.get("turn_number")) for event in game_events
+            if event.get("turn_player") == MY_PLAYER and as_int(event.get("turn_number")) > ko_turn
+        })
+        next_turn = next_my_turns[0] if next_my_turns else 0
+        next_turn_events = [event for event in game_events if as_int(event.get("turn_number")) == next_turn]
+        next_attack = next((
+            event for event in next_turn_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("event_type") == "attack"
+            and event.get("card_name") in {"Annihilape", "Primeape", "Hawlucha"}
+        ), None)
+        setup_events = [
+            event for event in next_turn_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("event_type") in {"bench_pokemon", "evolve", "manual_attach", "effect_attach"}
+            and (event.get("card_name") in {"Mankey", "Primeape", "Annihilape", "Hawlucha", "Basic Fighting Energy"}
+                 or event.get("target_card") in {"Primeape", "Annihilape", "Hawlucha"})
+        ]
+        board_after = any(
+            event.get("event_player") == MY_PLAYER
+            and event.get("card_name") in {"Mankey", "Primeape", "Annihilape", "Hawlucha"}
+            and as_int(event.get("turn_number")) >= ko_turn
+            for event in game_events
+        )
+        if next_attack and not setup_events:
+            state = "ready now"
+        elif next_attack:
+            state = "reachable next turn"
+        elif board_after:
+            state = "not reachable"
+        else:
+            state = "no board"
+        evidence = next_attack.get("raw_line", "") if next_attack else (setup_events[0].get("raw_line", "") if setup_events else ko.get("raw_line", ""))
+        rows.append({"game": game_label(game_id), "game_id": game_id, "state": state, "evidence": evidence})
+    return rows
+
+
+def stadium_quality(events, selected_games):
+    selected_ids = {game["game_id"] for game in selected_games}
+    grouped = group_events_by_game(events, selected_ids)
+    rows = []
+    for game in selected_games:
+        game_id = game["game_id"]
+        game_events = grouped[game_id]
+        mapping = my_turn_map(game_events)
+        my_risky = [
+            event for event in game_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("event_type") == "stadium_play"
+            and event.get("card_name") == "Risky Ruins"
+        ]
+        first_risky_turn = my_turn_index(my_risky[0], mapping) if my_risky else "none"
+        first_mankey = next((
+            event for event in game_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("event_type") in {"bench_pokemon", "active_pokemon"}
+            and event.get("card_name") == "Mankey"
+        ), None)
+        before_mankey = bool(my_risky and first_mankey and as_int(my_risky[0].get("line_no")) < as_int(first_mankey.get("line_no")))
+        replaced = sum(
+            1 for event in game_events
+            if event.get("event_player") != MY_PLAYER
+            and event.get("event_type") == "stadium_play"
+            and event.get("card_name") != "Risky Ruins"
+        )
+        first_full = next((
+            event for event in game_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("event_type") == "attack"
+            and event.get("card_name") == "Annihilape"
+            and event.get("value") == "Impact Blow"
+            and as_int(event.get("amount")) >= 280
+        ), None)
+        depended = "unknown"
+        if first_full:
+            risky_before = any(
+                event.get("event_player") == MY_PLAYER
+                and event.get("source_card") == "Risky Ruins"
+                and event.get("event_type") == "damage_counters"
+                and as_int(event.get("line_no")) < as_int(first_full.get("line_no"))
+                for event in game_events
+            )
+            depended = "yes" if risky_before else "no"
+        rows.append({
+            "game": game_label(game_id),
+            "game_id": game_id,
+            "risky_ruins_played_by_turn": first_risky_turn,
+            "in_play_before_mankey_benched": "yes" if before_mankey else "no" if my_risky and first_mankey else "unknown",
+            "opponent_replaced_it": replaced,
+            "first_full_power_depended_on_it": depended,
+        })
+    return rows
+
+
+def mulligan_warnings(selected_games):
+    rows = []
+    for game in selected_games:
+        my_mulligans = as_int(game.get("my_mulligans"))
+        visibility = game.get("my_opening_hand_visibility", "")
+        if my_mulligans or visibility == "hidden_after_mulligan":
+            rows.append({
+                "game": game_label(game.get("game_id", "")),
+                "game_id": game.get("game_id", ""),
+                "my_mulligans": my_mulligans,
+                "opening_hand_visibility": visibility or "unknown",
+                "warning": "Opening hand after mulligan was hidden; hand-based conclusions are lower confidence.",
+            })
+    return rows
+
+
+def format_reason(reason):
+    if isinstance(reason, dict):
+        return f"{reason.get('reason', 'unknown')} [{reason.get('confidence', 'low')}]"
+    return str(reason)
+
+
+def annihilape_miss_reasons(events, selected_games, success_rows):
+    selected_ids = {game["game_id"] for game in selected_games}
+    game_by_id = {game["game_id"]: game for game in selected_games}
     missed_ids = {
         row.get("game_id") for row in success_rows
         if row.get("game_id") in selected_ids
@@ -264,12 +560,14 @@ def annihilape_miss_reasons(events, selected_ids, success_rows):
             grouped[event.get("game_id")].append(event)
 
     counts = Counter({
-        "Candy issue": 0,
-        "Primeape issue": 0,
-        "Energy issue": 0,
-        "Damage-counter issue": 0,
-        "KO/disruption issue": 0,
-        "Unknown/hidden information": 0,
+        "no Mankey": 0,
+        "unknown/no visible Mankey": 0,
+        "no Primeape/evolution": 0,
+        "no Annihilape": 0,
+        "no energy": 0,
+        "no damage counters / Lose Cool inactive": 0,
+        "KO/disruption": 0,
+        "unknown": 0,
     })
     details = []
 
@@ -279,6 +577,17 @@ def annihilape_miss_reasons(events, selected_ids, success_rows):
         mine = [event for event in game_events if event.get("event_player") == MY_PLAYER]
         early = [event for event in mine if my_turn_index(event, mapping) <= 4]
         early_board = [event for event in mine if my_turn_index(event, mapping) <= 3]
+        game = game_by_id.get(game_id, {})
+        hidden_or_mulligan = (
+            as_int(game.get("my_mulligans")) > 0
+            or game.get("my_opening_hand_visibility") in {"hidden", "hidden_after_mulligan"}
+        )
+
+        mankey_ready = any(
+            event.get("event_type") in {"active_pokemon", "bench_pokemon"}
+            and event.get("card_name") == "Mankey"
+            for event in early_board
+        )
 
         primeape_ready = any(
             event.get("event_type") == "evolve" and event.get("card_name") == "Primeape"
@@ -311,21 +620,30 @@ def annihilape_miss_reasons(events, selected_ids, success_rows):
         )
 
         reasons = []
-        if not primeape_ready:
-            reasons.append("Primeape issue")
+
+        def add_reason(label, confidence):
+            reasons.append({"reason": label, "confidence": confidence})
+
+        if not mankey_ready:
+            if hidden_or_mulligan:
+                add_reason("unknown/no visible Mankey", "low")
+            else:
+                add_reason("no Mankey", "medium")
+        if mankey_ready and not primeape_ready:
+            add_reason("no Primeape/evolution", "low" if hidden_or_mulligan else "medium")
         if primeape_ready and not rare_candy_seen and not annihilape_ready:
-            reasons.append("Candy issue")
+            add_reason("no Annihilape", "low" if hidden_or_mulligan else "medium")
         if annihilape_ready and not energy_on_annihilape:
-            reasons.append("Energy issue")
+            add_reason("no energy", "low" if hidden_or_mulligan else "medium")
         if annihilape_ready and energy_on_annihilape and not damage_setup:
-            reasons.append("Damage-counter issue")
+            add_reason("no damage counters / Lose Cool inactive", "low" if hidden_or_mulligan else "medium")
         if disrupted:
-            reasons.append("KO/disruption issue")
+            add_reason("KO/disruption", "high")
         if not reasons:
-            reasons.append("Unknown/hidden information")
+            add_reason("unknown", "low" if hidden_or_mulligan else "medium")
 
         for reason in reasons:
-            counts[reason] += 1
+            counts[reason["reason"]] += 1
         details.append({"game": game_label(game_id), "game_id": game_id, "reasons": reasons})
 
     return {"counts": dict(counts), "details": details}
@@ -457,7 +775,7 @@ def coach_snapshot(summary, goals, recommendations):
     focus = recommendations[0]["next_experiment"] if recommendations else "Keep collecting clean logs."
 
     if any(goal["goal_id"] == "annihilape_attack_by_turn4" for goal in miss_goals[:2]):
-        focus = "Get Annihilape attacking by Turn 4."
+        focus = "Get 2 Mankey down early, enable 280 damage, and have a backup attacker plan before first Annihilape dies."
     elif miss_goals and miss_goals[0]["goal_id"] == "full_power_impact_blow":
         focus = "Set up enough damage counters before the first Impact Blow."
 
@@ -484,7 +802,12 @@ def build_report(args):
     summary = summarize_games(selected_games)
     goals = goal_summary(success_rows, selected_ids)
     event_data = event_summary(events, selected_ids, deck_cards)
-    miss_reasons = annihilape_miss_reasons(events, selected_ids, success_rows)
+    card_tracking = card_tracking_summary(events, selected_ids, deck_cards)
+    attack_quality = annihilape_attack_quality(events, selected_games)
+    backup_attackers = backup_attacker_summary(events, selected_games)
+    stadium = stadium_quality(events, selected_games)
+    miss_reasons = annihilape_miss_reasons(events, selected_games, success_rows)
+    mulligans = mulligan_warnings(selected_games)
 
     recommendations = []
     recommendations.extend(
@@ -512,7 +835,12 @@ def build_report(args):
         "summary": summary,
         "success_conditions": goals,
         "events": event_data,
+        "card_tracking": card_tracking,
+        "annihilape_attack_quality": attack_quality,
+        "backup_attacker": backup_attackers,
+        "stadium_quality": stadium,
         "annihilape_attack_miss_reasons": miss_reasons,
+        "mulligan_warnings": mulligans,
         "coach_snapshot": snapshot,
         "recommendations": recommendations,
     }
@@ -540,6 +868,13 @@ def render_report(payload):
         lines.append(f"- {game['game']}: {game['result']} vs {game['opponent']} going {first}")
     lines.append("")
 
+    if payload.get("mulligan_warnings"):
+        lines.append("## Mulligan Warning")
+        lines.append("Opening hand after mulligan was hidden; hand-based conclusions are lower confidence.")
+        evidence = ", ".join(row["game"] for row in payload["mulligan_warnings"][:6])
+        lines.append(f"Evidence: {evidence}")
+        lines.append("")
+
     lines.append("## Biggest Misses")
     misses = [goal for goal in payload["success_conditions"] if goal["missed"] > 0]
     for goal in misses[:6]:
@@ -554,9 +889,13 @@ def render_report(payload):
     lines.append("")
 
     lines.append("## Card And Attack Signals")
-    top_cards = payload["events"]["top_cards"][:6]
-    if top_cards:
-        lines.append("Top visible card usage: " + ", ".join(f"{card} ({count})" for card, count in top_cards))
+    played_cards = [row for row in payload["card_tracking"] if row.get("played", 0) > 0][:6]
+    if played_cards:
+        lines.append("Top played cards: " + ", ".join(f"{row['card_name']} ({row['played']})" for row in played_cards))
+    triggered_cards = sorted(payload["card_tracking"], key=lambda row: -row.get("activated_triggered", 0))[:4]
+    triggered_cards = [row for row in triggered_cards if row.get("activated_triggered", 0) > 0]
+    if triggered_cards:
+        lines.append("Top activated/attack cards: " + ", ".join(f"{row['card_name']} ({row['activated_triggered']})" for row in triggered_cards))
     top_attacks = payload["events"]["top_attacks"][:4]
     for attack in top_attacks:
         lines.append(
@@ -567,21 +906,64 @@ def render_report(payload):
         lines.append("Recently unused deck cards: " + ", ".join(unused))
     lines.append("")
 
+    lines.append("## Card Flow")
+    for row in payload["card_tracking"][:10]:
+        lines.append(
+            f"- {row['card_name']}: drawn {row['drawn']}, played {row['played']}, "
+            f"activated/triggered {row['activated_triggered']}, searched/fetched {row['searched_fetched']}, "
+            f"discarded {row['discarded']}, shuffled back {row['shuffled_back']}, "
+            f"stuck/unused {row['stuck_in_hand_unused']}"
+        )
+    lines.append("")
+
+    lines.append("## Annihilape Attack Quality")
+    for row in payload["annihilape_attack_quality"][-6:]:
+        if row["first_attack_turn"] == "none":
+            lines.append(f"- {row['game']}: no Annihilape attack")
+        else:
+            lines.append(
+                f"- {row['game']}: T{row['first_attack_turn']} {row['attack_name']} "
+                f"for {row['damage_dealt']} damage; Lose Cool {row['lose_cool_active']}; "
+                f"KO {row['ko_taken']}; full-power Impact Blow {row['full_power_impact_blow']}"
+            )
+    lines.append("")
+
+    lines.append("## Backup Attacker After First Annihilape KO")
+    backup_counts = Counter(row["state"] for row in payload["backup_attacker"])
+    for state in ["ready now", "reachable next turn", "not reachable", "no board", "not tested"]:
+        if backup_counts[state]:
+            evidence = [row["game"] for row in payload["backup_attacker"] if row["state"] == state][:5]
+            lines.append(f"- {state}: {backup_counts[state]} ({', '.join(evidence)})")
+    lines.append("")
+
+    lines.append("## Stadium Quality")
+    risky_by_t2 = [row for row in payload["stadium_quality"] if row["risky_ruins_played_by_turn"] not in {"none", ""} and as_int(row["risky_ruins_played_by_turn"]) <= 2]
+    before_mankey = [row for row in payload["stadium_quality"] if row["in_play_before_mankey_benched"] == "yes"]
+    replaced = sum(as_int(row["opponent_replaced_it"]) for row in payload["stadium_quality"])
+    depended = [row for row in payload["stadium_quality"] if row["first_full_power_depended_on_it"] == "yes"]
+    lines.append(f"- Risky Ruins by Turn 2: {len(risky_by_t2)}/{len(payload['stadium_quality'])}")
+    lines.append(f"- In play before Mankey benched: {len(before_mankey)}/{len(payload['stadium_quality'])}")
+    lines.append(f"- Opponent replacements seen: {replaced}")
+    lines.append(f"- First full-power Annihilape depended on it: {len(depended)} game(s)")
+    lines.append("")
+
     lines.append("## First Annihilape Attack Miss Reason")
     reason_counts = payload["annihilape_attack_miss_reasons"]["counts"]
     for label in [
-        "Candy issue",
-        "Primeape issue",
-        "Energy issue",
-        "Damage-counter issue",
-        "KO/disruption issue",
-        "Unknown/hidden information",
+        "no Mankey",
+        "unknown/no visible Mankey",
+        "no Primeape/evolution",
+        "no Annihilape",
+        "no energy",
+        "no damage counters / Lose Cool inactive",
+        "KO/disruption",
+        "unknown",
     ]:
         lines.append(f"- {label}: {reason_counts.get(label, 0)}")
     reason_details = payload["annihilape_attack_miss_reasons"].get("details", [])
     if reason_details:
         detail_text = "; ".join(
-            f"{row['game']} ({', '.join(row['reasons'])})" for row in reason_details[:6]
+            f"{row['game']} ({', '.join(format_reason(reason) for reason in row['reasons'])})" for row in reason_details[:6]
         )
         lines.append(f"Evidence: {detail_text}")
     lines.append("Note: these are log-derived heuristics; hidden hand/prize state can make the true reason ambiguous.")
@@ -622,6 +1004,12 @@ def render_concise_report(payload):
     lines.append(f"- Going second: {summary['went_second_wins']}/{summary['went_second']} wins")
     lines.append("")
 
+    if payload.get("mulligan_warnings"):
+        lines.append("## Mulligan Warning")
+        lines.append("Opening hand after mulligan was hidden; hand-based conclusions are lower confidence.")
+        lines.append("Evidence: " + ", ".join(row["game"] for row in payload["mulligan_warnings"][:5]))
+        lines.append("")
+
     misses = [goal for goal in payload["success_conditions"] if goal["missed"] > 0 and goal["confidence"] != "low"]
     lines.append("## Why")
     for goal in misses[:3]:
@@ -633,13 +1021,50 @@ def render_concise_report(payload):
         lines.append("- No major success-condition misses in this sample.")
     lines.append("")
 
+    played_cards = [row for row in payload["card_tracking"] if row.get("played", 0) > 0][:4]
+    if played_cards:
+        lines.append("## Card Flow Snapshot")
+        for row in played_cards:
+            lines.append(
+                f"- {row['card_name']}: drawn {row['drawn']}, played {row['played']}, "
+                f"activated/triggered {row['activated_triggered']}, stuck/unused {row['stuck_in_hand_unused']}"
+            )
+        lines.append("")
+
     lines.append("## First Annihilape Attack Miss Reason")
     reason_counts = payload["annihilape_attack_miss_reasons"]["counts"]
-    for label in ["Candy issue", "Primeape issue", "Energy issue", "Damage-counter issue", "KO/disruption issue"]:
+    for label in ["no Mankey", "unknown/no visible Mankey", "no Primeape/evolution", "no Annihilape", "no energy", "no damage counters / Lose Cool inactive", "KO/disruption"]:
         lines.append(f"- {label}: {reason_counts.get(label, 0)}")
-    unknown = reason_counts.get("Unknown/hidden information", 0)
+    unknown = reason_counts.get("unknown", 0)
     if unknown:
-        lines.append(f"- Unknown/hidden information: {unknown}")
+        lines.append(f"- unknown: {unknown}")
+    lines.append("")
+
+    attack_rows = payload["annihilape_attack_quality"][-3:]
+    if attack_rows:
+        lines.append("## Recent Annihilape Attacks")
+        for row in attack_rows:
+            if row["first_attack_turn"] == "none":
+                lines.append(f"- {row['game']}: no Annihilape attack")
+            else:
+                lines.append(
+                    f"- {row['game']}: T{row['first_attack_turn']} {row['attack_name']}, "
+                    f"{row['damage_dealt']} damage, full-power {row['full_power_impact_blow']}"
+                )
+    backup_bad = [row for row in payload["backup_attacker"] if row["state"] in {"not reachable", "no board"}]
+    if backup_bad:
+        lines.append("Backup issue evidence: " + ", ".join(row["game"] for row in backup_bad[:5]))
+    lines.append("")
+
+    backup_counts = Counter(row["state"] for row in payload["backup_attacker"])
+    stadium_rows = payload["stadium_quality"]
+    risky_by_t2 = [row for row in stadium_rows if row["risky_ruins_played_by_turn"] not in {"none", ""} and as_int(row["risky_ruins_played_by_turn"]) <= 2]
+    lines.append("## Board Plan Snapshot")
+    lines.append(
+        f"- Backup after first Annihilape KO: ready {backup_counts['ready now']}, "
+        f"reachable {backup_counts['reachable next turn']}, not reachable {backup_counts['not reachable']}, no board {backup_counts['no board']}"
+    )
+    lines.append(f"- Risky Ruins by Turn 2: {len(risky_by_t2)}/{len(stadium_rows)}")
     lines.append("")
 
     if payload["recommendations"]:
@@ -672,10 +1097,12 @@ def main():
     args = parser.parse_args()
 
     payload = build_report(args)
-    rendered = render_report(payload) if args.verbose else render_concise_report(payload)
+    concise_rendered = render_concise_report(payload)
+    verbose_rendered = render_report(payload)
+    rendered = verbose_rendered if args.verbose else concise_rendered
     print(rendered, end="")
     if not args.no_write:
-        write_report_outputs(args, rendered, payload)
+        write_report_outputs(args, concise_rendered, verbose_rendered, payload)
 
 
 if __name__ == "__main__":

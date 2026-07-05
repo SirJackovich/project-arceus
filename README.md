@@ -80,7 +80,14 @@ Generate a last-10-games coaching report:
 python3 scripts/coach_report.py --last 10
 ```
 
-The latest report is written to `data/analysis/coach_report.md` and each run also saves a timestamped copy in `data/coaching_sessions/`.
+Each run writes both latest reports side by side:
+
+- `data/analysis/coach_report.md`
+- `data/analysis/coach_report.json`
+- `data/analysis/coach_report_verbose.md`
+- `data/analysis/coach_report_verbose.json`
+
+Each run also saves timestamped copies in `data/coaching_sessions/`.
 
 Generate a single-game summary for the newest match:
 

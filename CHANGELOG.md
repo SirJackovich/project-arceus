@@ -1,11 +1,24 @@
 # Changelog
 
+## v0.4.1
+
+- Fixed mulligan-hand handling so revealed mulligan cards are tracked separately from playable opening-hand cards.
+- Added mulligan counts and opening-hand visibility fields to parsed game output.
+- Lowered confidence for hand-based miss reasons when the post-mulligan hand is hidden.
+- Added coach report warnings for games with hidden post-mulligan hands.
+- Added a Game 45-style regression test for mulligan Risky Ruins availability and missed-setup diagnosis.
+
+## v0.4.0
+
+- Improved coach report metrics for card flow, Annihilape attack quality, backup attacker readiness, Stadium quality, and missed-goal causes.
+
 ## v0.3.0
 
 - Added a one-command post-game flow with `scripts/post_game.py`.
 - Made the default coach report concise with Coach Grade, Biggest Strength, Biggest Weakness, and Today's Focus.
 - Made workbook generation opt-in with `scripts/run_analysis.py --with-workbook`.
 - Added timestamped coaching session snapshots under `data/coaching_sessions/`.
+- Saved concise and verbose coach reports side by side for both latest outputs and coaching session snapshots.
 - Added a CLI coaching report for the last N games.
 - Added single-game coach report support with `--game latest`.
 - Added a one-command local analysis pipeline with `scripts/run_analysis.py`.

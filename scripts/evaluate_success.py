@@ -132,11 +132,11 @@ def evaluate_game(game, events):
 
     mankey_play_events = [
         e for e in my_events
-        if e["card_name"] == "Mankey" and e["event_type"] in {"opening_hand", "active_pokemon", "bench_pokemon"}
+        if e["card_name"] == "Mankey" and e["event_type"] in {"active_pokemon", "bench_pokemon"}
     ]
     mankey_by_t2 = [
         e for e in mankey_play_events
-        if e["event_type"] == "opening_hand" or my_turn_index(e, mapping) <= 2
+        if my_turn_index(e, mapping) <= 2
     ]
     mankey_in_play_by_t3 = [
         e for e in my_events

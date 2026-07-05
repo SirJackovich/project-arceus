@@ -127,6 +127,17 @@ def parse_log(path):
     last_context = None
     pending_bullet_context = None
     setup_seen = False
+    last_mulligan_player = ""
+    mulligan_counts = Counter()
+
+    def reclassify_opening_hand_as_mulligan(player):
+        for event in events:
+            if event.get("event_player") != player:
+                continue
+            if event.get("event_type") == "opening_hand":
+                event["event_type"] = "mulligan_revealed_card"
+            elif event.get("event_type") == "opening_hand_draw":
+                event["event_type"] = "mulligan_hand_draw"
 
     for line_no, line in enumerate(lines, start=1):
         stripped = line.strip()
@@ -180,6 +191,11 @@ def parse_log(path):
 
         if stripped.startswith("- ") or stripped.startswith("•"):
             bullet = stripped[2:].strip() if stripped.startswith("- ") else stripped[1:].strip()
+            if bullet.startswith("Cards revealed from Mulligan"):
+                pending_bullet_context = ("mulligan_revealed_card", last_mulligan_player, "", "", "")
+                add_event(events, path.name, game_id, line_no, turn_number, turn_player, stripped,
+                          "mulligan_reveal", player=last_mulligan_player, value=bullet)
+                continue
             if bullet.startswith("Damage breakdown"):
                 add_event(events, path.name, game_id, line_no, turn_number, turn_player, stripped,
                           "effect_detail",
@@ -265,6 +281,22 @@ def parse_log(path):
         p = player_from_line(stripped)
         if p:
             players.add(p)
+
+        match = re.match(r"^(.+) took (a|\d+) mulligans?\.$", stripped)
+        if match:
+            player, amount = match.groups()
+            count = parse_count(amount)
+            players.add(player)
+            if player != MY_PLAYER and not first_non_user_player:
+                first_non_user_player = player
+            last_mulligan_player = player
+            mulligan_counts[player] = max(mulligan_counts[player], count)
+            reclassify_opening_hand_as_mulligan(player)
+            add_event(events, path.name, game_id, line_no, turn_number, turn_player, stripped,
+                      "mulligan_taken", player=player, amount=count)
+            last_context = None
+            pending_bullet_context = None
+            continue
 
         match = re.match(r"^(.+) drew (\d+) more cards? because .+ took at least 1 mulligan\.$", stripped)
         if match:
@@ -405,6 +437,20 @@ def parse_log(path):
     result = "win" if winner == MY_PLAYER else "loss" if winner else "unknown"
     my_turns = len({event["turn_number"] for event in events if event["turn_player"] == MY_PLAYER})
     opp_turns = len({event["turn_number"] for event in events if event["turn_player"] and event["turn_player"] != MY_PLAYER})
+    my_opening_cards_seen = sum(
+        1 for event in events
+        if event["event_player"] == MY_PLAYER and event["event_type"] == "opening_hand" and event["card_name"]
+    )
+    my_mulligans = mulligan_counts[MY_PLAYER]
+    opponent_mulligans = sum(count for player, count in mulligan_counts.items() if player != MY_PLAYER)
+    if my_mulligans and not my_opening_cards_seen:
+        my_opening_hand_visibility = "hidden_after_mulligan"
+    elif my_mulligans:
+        my_opening_hand_visibility = "shown_after_mulligan"
+    elif my_opening_cards_seen:
+        my_opening_hand_visibility = "shown"
+    else:
+        my_opening_hand_visibility = "hidden"
 
     game = {
         "game_id": game_id,
@@ -419,6 +465,9 @@ def parse_log(path):
         "turns_total": turn_number,
         "my_turns": my_turns,
         "opponent_turns": opp_turns,
+        "my_mulligans": my_mulligans,
+        "opponent_mulligans": opponent_mulligans,
+        "my_opening_hand_visibility": my_opening_hand_visibility,
         "events_total": len(events),
         "parsed_lines": len([line for line in lines if line.strip()]),
         "has_game_log": "yes" if setup_seen and winner else "partial",
@@ -709,6 +758,7 @@ def main():
     csv_write(output_dir / "games.csv", games, [
         "game_id", "game_number", "file", "opponent", "winner", "result", "win_reason",
         "opening_player", "my_went_first", "turns_total", "my_turns", "opponent_turns",
+        "my_mulligans", "opponent_mulligans", "my_opening_hand_visibility",
         "events_total", "parsed_lines", "has_game_log"
     ])
     csv_write(output_dir / "raw_events.csv", events, [

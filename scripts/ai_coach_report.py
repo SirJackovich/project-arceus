@@ -10,6 +10,14 @@ from pathlib import Path
 
 
 DEFAULT_MODEL = "gpt-5.1"
+DEFAULT_EXPERIMENT = {
+    "current_experiment": {
+        "name": "SSP Annihilape and Waitress test",
+        "changed_cards": ["1 Annihilape SSP 100", "2 Waitress ASC 215"],
+        "target_question": "Do SSP Annihilape and Waitress improve rebuilds, tempo, or awkward evolution/energy games?",
+        "status": "active",
+    }
+}
 
 
 def read_json(path, default=None):
@@ -60,11 +68,14 @@ def compact_evidence(evidence, last):
         "mulligan_warnings": evidence.get("mulligan_warnings", []),
         "card_tracking": evidence.get("card_tracking", [])[:15],
         "annihilape_attack_quality": evidence.get("annihilape_attack_quality", [])[-last:],
+        "attack_decision_quality": evidence.get("attack_decision_quality", [])[-30:],
         "stadium_quality": evidence.get("stadium_quality", [])[-last:],
         "evolution_line": evidence.get("evolution_line", {}),
         "line_rebuild": evidence.get("line_rebuild", [])[-last:],
         "backup_attacker": evidence.get("backup_attacker", [])[-last:],
         "possible_loss_factors": evidence.get("possible_loss_factors", []),
+        "experiment_metrics": evidence.get("experiment_metrics", {}),
+        "candidate_strengths": evidence.get("candidate_strengths", []),
         "legacy_first_attack_miss_reasons": evidence.get("annihilape_attack_miss_reasons", {}),
     }
 
@@ -74,7 +85,7 @@ def build_context(args):
     if not evidence:
         raise SystemExit(f"Missing deterministic evidence JSON: {args.evidence_json}")
     deck = read_json(args.deck, {})
-    experiment = read_json(args.experiment_state, {}) or {"status": "no current experiment"}
+    experiment = read_json(args.experiment_state, DEFAULT_EXPERIMENT) or DEFAULT_EXPERIMENT
     return {
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "instructions": "Use deterministic evidence only. Do not parse raw logs.",
@@ -122,13 +133,40 @@ def response_text(response):
 
 def extract_json_summary(text):
     blocks = re.findall(r"```json\s*(\{.*?\})\s*```", text, flags=re.DOTALL)
-    candidates = blocks or re.findall(r"(\{\s*\"coach_grade\".*\})", text, flags=re.DOTALL)
+    candidates = blocks or re.findall(r"(\{\s*\"(?:verdict|coach_grade)\".*\})", text, flags=re.DOTALL)
     for candidate in reversed(candidates):
         try:
             return json.loads(candidate)
         except json.JSONDecodeError:
             continue
     return {"parse_status": "missing_json_summary"}
+
+
+def terminal_report(markdown, summary):
+    labels = [
+        ("Verdict", "verdict"),
+        ("Why", "why"),
+        ("Biggest Positive", "biggest_positive"),
+        ("Biggest Mistake", "biggest_mistake"),
+        ("Experiment Status", "experiment_status"),
+        ("Next Focus", "next_focus"),
+    ]
+    if summary and "verdict" in summary:
+        lines = ["# Project Arceus AI Coach Report", ""]
+        for title, key in labels:
+            value = str(summary.get(key, "")).strip() or "Not provided"
+            lines.extend([f"## {title}", value, ""])
+        return "\n".join(lines).rstrip() + "\n"
+
+    sections = []
+    for title, _ in labels:
+        pattern = rf"(^##?\s+{re.escape(title)}\s*$.*?)(?=^##?\s+|\Z)"
+        match = re.search(pattern, markdown, flags=re.MULTILINE | re.DOTALL | re.IGNORECASE)
+        if match:
+            sections.append(match.group(1).strip())
+    if sections:
+        return "# Project Arceus AI Coach Report\n\n" + "\n\n".join(sections[:6]) + "\n"
+    return markdown[:1600].rstrip() + "\n"
 
 
 def main():
@@ -182,7 +220,7 @@ def main():
 
     write_text(args.output_md, rendered)
     write_json(args.output_json, summary)
-    print(rendered)
+    print(terminal_report(rendered, summary))
     print(f"\nWrote {args.output_md} and {args.output_json}")
 
 

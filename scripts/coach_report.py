@@ -419,6 +419,177 @@ def annihilape_attack_quality(events, selected_games):
     return rows
 
 
+def attack_decision_quality(events, selected_games):
+    selected_ids = {game["game_id"] for game in selected_games}
+    grouped = group_events_by_game(events, selected_ids)
+    rows = []
+    for game in selected_games:
+        game_id = game["game_id"]
+        game_events = grouped[game_id]
+        mapping = my_turn_map(game_events)
+        attacks = [
+            event for event in game_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("event_type") == "attack"
+            and event.get("card_name") in {"Annihilape", "Primeape"}
+        ]
+        for attack in attacks:
+            details = related_effect_details(game_events, attack)
+            line_no = as_int(attack.get("line_no"))
+            turn_number = as_int(attack.get("turn_number"))
+            attacker = attack.get("card_name", "")
+            ko_taken = any(
+                detail.get("event_type") == "knockout_received"
+                and detail.get("source_card") == attacker
+                and detail.get("event_player") != MY_PLAYER
+                for detail in details
+            )
+            prize_value = sum(
+                as_int(detail.get("amount"))
+                for detail in details
+                if detail.get("event_type") == "prize_taken" and detail.get("event_player") == MY_PLAYER
+            )
+            opponent_next_turns = sorted({
+                as_int(event.get("turn_number")) for event in game_events
+                if event.get("turn_player") and event.get("turn_player") != MY_PLAYER
+                and as_int(event.get("turn_number")) > turn_number
+            })
+            next_opp_turn = opponent_next_turns[0] if opponent_next_turns else 0
+            immediate_ko = any(
+                event.get("event_type") == "knockout_received"
+                and event.get("event_player") == MY_PLAYER
+                and event.get("card_name") == attacker
+                and as_int(event.get("turn_number")) == next_opp_turn
+                and as_int(event.get("line_no")) > line_no
+                for event in game_events
+            )
+            rows.append({
+                "game": game_label(game_id),
+                "game_id": game_id,
+                "turn": my_turn_index(attack, mapping) or "unknown",
+                "attacker": attacker,
+                "attack": attack.get("value", ""),
+                "target": attack.get("target_card", ""),
+                "damage": as_int(attack.get("amount")),
+                "ko": "yes" if ko_taken else "no",
+                "prize_value": prize_value,
+                "opponent_immediately_ko_attacker": "yes" if immediate_ko else "no" if next_opp_turn else "unknown",
+                "evidence": attack.get("raw_line", ""),
+            })
+    return rows
+
+
+def experiment_card_metrics(events, selected_games):
+    selected_ids = {game["game_id"] for game in selected_games}
+    grouped = group_events_by_game(events, selected_ids)
+    waitress_played = 0
+    waitress_attached = 0
+    waitress_whiffs = 0
+    waitress_games = set()
+    ssp_attack_count = 0
+    ssp_games = set()
+    ssp_wins = 0
+    ssp_losses = 0
+    evidence = []
+    for game in selected_games:
+        game_id = game["game_id"]
+        game_events = grouped[game_id]
+        my_waitress = [
+            event for event in game_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("event_type") == "play_card"
+            and event.get("card_name") == "Waitress"
+        ]
+        for play in my_waitress:
+            waitress_played += 1
+            waitress_games.add(game_id)
+            line_no = as_int(play.get("line_no"))
+            turn = play.get("turn_number")
+            attached = any(
+                event.get("event_player") == MY_PLAYER
+                and event.get("source_card") == "Waitress"
+                and event.get("event_type") == "effect_attach"
+                and as_int(event.get("line_no")) > line_no
+                and event.get("turn_number") == turn
+                for event in game_events
+            )
+            if attached:
+                waitress_attached += 1
+            else:
+                waitress_whiffs += 1
+            evidence.append({
+                "game": game_label(game_id),
+                "card": "Waitress",
+                "result": "attached energy" if attached else "whiff/no visible attach",
+                "evidence": play.get("raw_line", ""),
+            })
+        ssp_attacks = [
+            event for event in game_events
+            if event.get("event_player") == MY_PLAYER
+            and event.get("event_type") == "attack"
+            and event.get("card_name") == "Annihilape"
+            and event.get("value") in {"Tantrum", "Destined Fight"}
+        ]
+        if ssp_attacks:
+            ssp_games.add(game_id)
+            ssp_attack_count += len(ssp_attacks)
+            if game.get("result") == "win":
+                ssp_wins += 1
+            elif game.get("result") == "loss":
+                ssp_losses += 1
+            for attack in ssp_attacks:
+                evidence.append({
+                    "game": game_label(game_id),
+                    "card": "Annihilape SSP 100",
+                    "result": attack.get("value", ""),
+                    "evidence": attack.get("raw_line", ""),
+                })
+    return {
+        "current_experiment": {
+            "changed_cards": ["1 Annihilape SSP 100", "2 Waitress ASC 215"],
+            "target_question": "Do SSP Annihilape and Waitress improve rebuilds, tempo, or awkward evolution/energy games?",
+        },
+        "waitress_played_count": waitress_played,
+        "waitress_attached_energy_count": waitress_attached,
+        "waitress_whiff_count": waitress_whiffs,
+        "waitress_games": [game_label(game_id) for game_id in sorted(waitress_games, key=game_number)],
+        "ssp_annihilape_attack_count": ssp_attack_count,
+        "ssp_annihilape_games": [game_label(game_id) for game_id in sorted(ssp_games, key=game_number)],
+        "ssp_outcome": {
+            "wins_when_ssp_attacked": ssp_wins,
+            "losses_when_ssp_attacked": ssp_losses,
+            "neutral_no_ssp_attack_games": len(selected_games) - len(ssp_games),
+            "classification": "neutral" if ssp_attack_count == 0 or ssp_wins == ssp_losses else "won" if ssp_wins > ssp_losses else "lost",
+            "inference_note": "SSP Annihilape is inferred from unique attacks Tantrum and Destined Fight because logs omit set IDs.",
+        },
+        "evidence": evidence[:12],
+    }
+
+
+def candidate_strengths(goals, stadium, evolution_line, line_rebuild):
+    rows = []
+    total = len(stadium)
+    risky_by_t2 = sum(1 for row in stadium if row.get("risky_ruins_played_by_turn") not in {"none", ""} and as_int(row.get("risky_ruins_played_by_turn")) <= 2)
+    if total:
+        rows.append({"strength": "Risky Ruins access", "metric": f"{risky_by_t2}/{total} by Turn 2", "confidence": "high" if risky_by_t2 / total >= 0.7 else "medium"})
+    stage1_goal = next((goal for goal in goals if goal.get("goal_id") == "evolve_primeape_by_turn3"), None)
+    if stage1_goal and stage1_goal.get("games"):
+        met = as_int(stage1_goal.get("met"))
+        games = as_int(stage1_goal.get("games"))
+        rows.append({"strength": "Stage 1 setup", "metric": f"{met}/{games} Primeape by Turn 3", "confidence": "high" if games and met / games >= 0.7 else "medium"})
+    basic_goal = next((goal for goal in goals if goal.get("goal_id") == "setup_mankey_by_turn2"), None)
+    if basic_goal and basic_goal.get("games"):
+        met = as_int(basic_goal.get("met"))
+        games = as_int(basic_goal.get("games"))
+        rows.append({"strength": "early Basic setup", "metric": f"{met}/{games} Mankey by Turn 2", "confidence": "high" if games and met / games >= 0.7 else "medium"})
+    rebuild_counts = Counter(row.get("state") for row in line_rebuild)
+    rebuild_success = rebuild_counts.get("rebuilt complete line", 0) + rebuild_counts.get("partial rebuild", 0)
+    tested = len(line_rebuild) - rebuild_counts.get("not tested", 0)
+    if tested:
+        rows.append({"strength": "recovery/rebuild", "metric": f"{rebuild_success}/{tested} visible rebuilds after line break", "confidence": "medium"})
+    return rows
+
+
 def visible_hand_events(game_events):
     return [
         event for event in game_events
@@ -1072,6 +1243,7 @@ def build_report(args):
     event_data = event_summary(events, selected_ids, deck_cards)
     card_tracking = card_tracking_summary(events, selected_ids, deck_cards)
     attack_quality = annihilape_attack_quality(events, selected_games)
+    attack_decisions = attack_decision_quality(events, selected_games)
     evolution_line = evolution_line_analysis(events, selected_games)
     line_rebuild = rebuild_after_line_break(events, selected_games)
     backup_attackers = backup_attacker_summary(events, selected_games)
@@ -1079,6 +1251,8 @@ def build_report(args):
     miss_reasons = annihilape_miss_reasons(events, selected_games, success_rows)
     mulligans = mulligan_warnings(selected_games)
     possible_loss_factors = possible_loss_factors_from_evidence(evolution_line, line_rebuild, goals, mulligans)
+    experiment_metrics = experiment_card_metrics(events, selected_games)
+    strengths = candidate_strengths(goals, stadium, evolution_line, line_rebuild)
 
     recommendations = []
     evolution_rec = dominant_evolution_recommendation(evolution_line)
@@ -1112,6 +1286,7 @@ def build_report(args):
         "events": event_data,
         "card_tracking": card_tracking,
         "annihilape_attack_quality": attack_quality,
+        "attack_decision_quality": attack_decisions,
         "evolution_line": evolution_line,
         "line_rebuild": line_rebuild,
         "backup_attacker": backup_attackers,
@@ -1119,6 +1294,8 @@ def build_report(args):
         "annihilape_attack_miss_reasons": miss_reasons,
         "mulligan_warnings": mulligans,
         "possible_loss_factors": possible_loss_factors,
+        "experiment_metrics": experiment_metrics,
+        "candidate_strengths": strengths,
         "game_narrative": game_narrative(evolution_line, line_rebuild),
         "coach_snapshot": snapshot,
         "recommendations": recommendations,
@@ -1276,6 +1453,20 @@ def render_report(payload):
             f"- {factor.get('factor', '')}: {factor.get('count', 0)}/{factor.get('sample', 0)} "
             f"({factor.get('confidence', 'medium')} confidence; {evidence})"
         )
+    lines.append("")
+
+    lines.append("## Current Experiment Evidence")
+    experiment = payload.get("experiment_metrics", {})
+    lines.append(f"- Waitress played: {experiment.get('waitress_played_count', 0)}")
+    lines.append(f"- Waitress attached energy: {experiment.get('waitress_attached_energy_count', 0)}")
+    lines.append(f"- Waitress whiff/no visible attach: {experiment.get('waitress_whiff_count', 0)}")
+    lines.append(f"- SSP Annihilape attacks: {experiment.get('ssp_annihilape_attack_count', 0)}")
+    lines.append(f"- SSP outcome: {experiment.get('ssp_outcome', {}).get('classification', 'neutral')}")
+    lines.append("")
+
+    lines.append("## Candidate Strengths")
+    for row in payload.get("candidate_strengths", [])[:4]:
+        lines.append(f"- {row.get('strength')}: {row.get('metric')} ({row.get('confidence')} confidence)")
     return "\n".join(lines) + "\n"
 
 
@@ -1371,6 +1562,19 @@ def render_concise_report(payload):
                 f"({factor.get('confidence', 'medium')} confidence; {evidence})"
             )
         lines.append("")
+
+    experiment = payload.get("experiment_metrics", {})
+    lines.append("## Current Experiment Evidence")
+    lines.append(
+        f"- Waitress: played {experiment.get('waitress_played_count', 0)}, "
+        f"attached {experiment.get('waitress_attached_energy_count', 0)}, "
+        f"whiff/no attach {experiment.get('waitress_whiff_count', 0)}"
+    )
+    lines.append(
+        f"- SSP Annihilape: {experiment.get('ssp_annihilape_attack_count', 0)} attacks; "
+        f"outcome {experiment.get('ssp_outcome', {}).get('classification', 'neutral')}"
+    )
+    lines.append("")
 
     lines.append("## Commands")
     lines.append("- New match: `python3 scripts/post_game.py`")

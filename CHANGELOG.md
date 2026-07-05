@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.6.1
+
+- Tightened the AI coach prompt to avoid default 280-damage waiting advice and require game evidence for card-specific criticism.
+- Added current experiment evidence for 1 SSP Annihilape and 2 Waitress, including Waitress attaches/whiffs and SSP attack outcome.
+- Added candidate strength evidence to avoid unsupported Hand Quality claims.
+- Added attack decision quality evidence for Annihilape and Primeape attacks.
+- Limited AI coach terminal output to six concise coaching sections while saving the full Markdown report.
+
 ## v0.6.0
 
 - Added a two-layer coaching flow with deterministic analyzer evidence and an AI-written coach report.

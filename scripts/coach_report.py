@@ -2,6 +2,7 @@
 import argparse
 import csv
 import json
+import re
 import unicodedata
 from collections import Counter, defaultdict
 from datetime import datetime
@@ -130,6 +131,29 @@ def as_int(value):
         return int(float(value))
     except (TypeError, ValueError):
         return 0
+
+
+def adjusted_attack_damage(event):
+    damage = as_int(event.get("amount"))
+    raw_line = event.get("raw_line", "")
+    match = re.search(r"took (-?\d+) (more|less) damage", raw_line)
+    if not match:
+        return damage
+    delta = as_int(match.group(1))
+    if match.group(2) == "less" and delta > 0:
+        delta = -delta
+    return damage + delta
+
+
+def attack_has_lose_cool(game_events, attack):
+    if not attack:
+        return False
+    details = related_effect_details(game_events, attack)
+    text = " ".join(
+        f"{event.get('raw_line', '')} {event.get('value', '')}"
+        for event in [attack] + details
+    )
+    return "Lose Cool" in text
 
 
 def canonical_name(name):
@@ -396,7 +420,7 @@ def annihilape_attack_quality(events, selected_games):
         ]
         first = attacks[0] if attacks else None
         details = related_effect_details(game_events, first) if first else []
-        detail_text = " ".join(event.get("raw_line", "") + " " + event.get("value", "") for event in details)
+        lose_cool_active = attack_has_lose_cool(game_events, first) if first else False
         ko_taken = any(
             event.get("event_type") == "knockout_received"
             and event.get("source_card") == "Annihilape"
@@ -404,6 +428,7 @@ def annihilape_attack_quality(events, selected_games):
             for event in details
         ) if first else False
         damage = as_int(first.get("amount")) if first else 0
+        final_damage = adjusted_attack_damage(first) if first else 0
         attack_name = first.get("value", "") if first else ""
         rows.append({
             "game": game_label(game_id),
@@ -412,9 +437,10 @@ def annihilape_attack_quality(events, selected_games):
             "first_attack_turn": my_turn_index(first, mapping) if first else "none",
             "attack_name": attack_name or "none",
             "damage_dealt": damage if first else "",
-            "lose_cool_active": "yes" if "Lose Cool" in detail_text else "no" if first else "unknown",
+            "final_damage_after_weakness_resistance": final_damage if first else "",
+            "lose_cool_active": "yes" if lose_cool_active else "no" if first else "unknown",
             "ko_taken": "yes" if ko_taken else "no" if first else "unknown",
-            "full_power_impact_blow": "yes" if attack_name == "Impact Blow" and damage >= 280 else "no" if first else "unknown",
+            "full_power_impact_blow": "yes" if attack_name == "Impact Blow" and lose_cool_active else "no" if first else "unknown",
         })
     return rows
 
@@ -471,6 +497,7 @@ def attack_decision_quality(events, selected_games):
                 "attack": attack.get("value", ""),
                 "target": attack.get("target_card", ""),
                 "damage": as_int(attack.get("amount")),
+                "final_damage_after_weakness_resistance": adjusted_attack_damage(attack),
                 "ko": "yes" if ko_taken else "no",
                 "prize_value": prize_value,
                 "opponent_immediately_ko_attacker": "yes" if immediate_ko else "no" if next_opp_turn else "unknown",
@@ -491,6 +518,7 @@ def experiment_card_metrics(events, selected_games):
     ssp_wins = 0
     ssp_losses = 0
     evidence = []
+    ssp_attack_rows = []
     for game in selected_games:
         game_id = game["game_id"]
         game_events = grouped[game_id]
@@ -538,12 +566,47 @@ def experiment_card_metrics(events, selected_games):
             elif game.get("result") == "loss":
                 ssp_losses += 1
             for attack in ssp_attacks:
-                evidence.append({
+                details = related_effect_details(game_events, attack)
+                line_no = as_int(attack.get("line_no"))
+                turn_number = as_int(attack.get("turn_number"))
+                next_my_turns = sorted({
+                    as_int(event.get("turn_number")) for event in game_events
+                    if event.get("turn_player") == MY_PLAYER and as_int(event.get("turn_number")) > turn_number
+                })
+                next_my_turn = next_my_turns[0] if next_my_turns else 0
+                my_prizes = sum(
+                    as_int(event.get("amount"))
+                    for event in details
+                    if event.get("event_type") == "prize_taken" and event.get("event_player") == MY_PLAYER
+                )
+                opponent_prizes = sum(
+                    as_int(event.get("amount"))
+                    for event in game_events
+                    if event.get("event_type") == "prize_taken"
+                    and event.get("event_player") not in {"", MY_PLAYER}
+                    and as_int(event.get("line_no")) > line_no
+                    and (not next_my_turn or as_int(event.get("turn_number")) < next_my_turn)
+                )
+                if my_prizes > opponent_prizes:
+                    outcome = "positive"
+                elif opponent_prizes > my_prizes:
+                    outcome = "negative"
+                else:
+                    outcome = "neutral"
+                ssp_row = {
                     "game": game_label(game_id),
+                    "game_number": game_number(game_id),
                     "card": "Annihilape SSP 100",
+                    "attack_used": attack.get("value", ""),
+                    "target": attack.get("target_card", ""),
+                    "prizes_gained": my_prizes,
+                    "opponent_prizes_gained": opponent_prizes,
+                    "outcome": outcome,
                     "result": attack.get("value", ""),
                     "evidence": attack.get("raw_line", ""),
-                })
+                }
+                evidence.append(ssp_row)
+                ssp_attack_rows.append(ssp_row)
     return {
         "current_experiment": {
             "changed_cards": ["1 Annihilape SSP 100", "2 Waitress ASC 215"],
@@ -555,6 +618,7 @@ def experiment_card_metrics(events, selected_games):
         "waitress_games": [game_label(game_id) for game_id in sorted(waitress_games, key=game_number)],
         "ssp_annihilape_attack_count": ssp_attack_count,
         "ssp_annihilape_games": [game_label(game_id) for game_id in sorted(ssp_games, key=game_number)],
+        "ssp_attacks": ssp_attack_rows,
         "ssp_outcome": {
             "wins_when_ssp_attacked": ssp_wins,
             "losses_when_ssp_attacked": ssp_losses,
@@ -871,6 +935,36 @@ def mulligan_warnings(selected_games):
     return rows
 
 
+def mulligan_rate_summary(selected_games):
+    rows = []
+    total_mulligans = 0
+    games_with_mulligan = 0
+    losses_with_mulligan = 0
+    for game in selected_games:
+        count = as_int(game.get("my_mulligans"))
+        total_mulligans += count
+        if count:
+            games_with_mulligan += 1
+            if game.get("result") == "loss":
+                losses_with_mulligan += 1
+        rows.append({
+            "game": game_label(game.get("game_id", "")),
+            "game_id": game.get("game_id", ""),
+            "mulligans": count,
+            "result": game.get("result", ""),
+            "lost_after_mulligan": "yes" if count and game.get("result") == "loss" else "no" if count else "not_applicable",
+        })
+    return {
+        "mulligans_per_game": rows,
+        "games": len(selected_games),
+        "games_with_1_plus_mulligan": games_with_mulligan,
+        "total_mulligans": total_mulligans,
+        "average_mulligans": round(total_mulligans / len(selected_games), 2) if selected_games else 0,
+        "losses_after_mulligan": losses_with_mulligan,
+        "note": "This deck has low Basic count; mulligans may be expected.",
+    }
+
+
 def format_reason(reason):
     if isinstance(reason, dict):
         return f"{reason.get('reason', 'unknown')} [{reason.get('confidence', 'low')}]"
@@ -1154,6 +1248,7 @@ def game_narrative(evolution, line_rebuild):
 def friendly_condition(condition):
     replacements = {
         "Attack with at least one full-power 280+ damage Impact Blow.": "Full-power Impact Blow",
+        "Attack with at least one Lose Cool/full-power Impact Blow.": "Full-power Impact Blow",
         "Get your first Annihilape attacking by your Turn 3-4.": "Late first Annihilape attack",
         "Open with Mankey or have one on the Bench by your Turn 2.": "Early Mankey setup",
         "Evolve into Primeape by your Turn 2-3.": "Primeape evolution timing",
@@ -1250,6 +1345,7 @@ def build_report(args):
     stadium = stadium_quality(events, selected_games)
     miss_reasons = annihilape_miss_reasons(events, selected_games, success_rows)
     mulligans = mulligan_warnings(selected_games)
+    mulligan_rates = mulligan_rate_summary(selected_games)
     possible_loss_factors = possible_loss_factors_from_evidence(evolution_line, line_rebuild, goals, mulligans)
     experiment_metrics = experiment_card_metrics(events, selected_games)
     strengths = candidate_strengths(goals, stadium, evolution_line, line_rebuild)
@@ -1293,6 +1389,7 @@ def build_report(args):
         "stadium_quality": stadium,
         "annihilape_attack_miss_reasons": miss_reasons,
         "mulligan_warnings": mulligans,
+        "mulligan_rate": mulligan_rates,
         "possible_loss_factors": possible_loss_factors,
         "experiment_metrics": experiment_metrics,
         "candidate_strengths": strengths,
@@ -1337,7 +1434,7 @@ def render_report(payload):
             f"missed {goal['missed']}/{goal['games']} - {goal['condition']}"
         )
         if goal["missed_games"]:
-            lines.append(f"  Evidence: {', '.join(goal['missed_games'][:5])}")
+            lines.append(f"  Evidence: {', '.join(goal['missed_games'])}")
     if not misses:
         lines.append("- No success-condition misses in this sample.")
     lines.append("")
@@ -1493,7 +1590,7 @@ def render_concise_report(payload):
     for goal in misses[:3]:
         lines.append(
             f"- {friendly_condition(goal['condition'])}: missed {goal['missed']}/{goal['games']} "
-            f"({', '.join(goal['missed_games'][:4])})"
+            f"({', '.join(goal['missed_games'])})"
         )
     if not misses:
         lines.append("- No major success-condition misses in this sample.")
@@ -1576,10 +1673,6 @@ def render_concise_report(payload):
     )
     lines.append("")
 
-    lines.append("## Commands")
-    lines.append("- New match: `python3 scripts/post_game.py`")
-    lines.append("- AI coach report: `python3 scripts/ai_coach_report.py --last 10`")
-    lines.append("- Detailed evidence: `python3 scripts/coach_report.py --last 10 --verbose`")
     return "\n".join(lines) + "\n"
 
 

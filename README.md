@@ -47,6 +47,16 @@ Import the latest pasted battle log and run the coach analysis:
 python3 scripts/post_game.py
 ```
 
+This is the normal one-command workflow. It imports the pasted log, runs deterministic analysis, then runs the AI coach for the last 10 games.
+
+Useful options:
+
+```bash
+python3 scripts/post_game.py --no-ai
+python3 scripts/post_game.py --verbose
+python3 scripts/post_game.py --last 15
+```
+
 Import a pasted battle log:
 
 ```bash
@@ -82,13 +92,13 @@ Evaluate deck success conditions:
 python3 scripts/evaluate_success.py
 ```
 
-Generate a last-10-games coaching report:
+Generate deterministic evidence only:
 
 ```bash
 python3 scripts/coach_report.py --last 10
 ```
 
-This is the deterministic evidence/debug report. The main structured output is:
+The main structured output is:
 
 - `data/analysis/deterministic_analysis.json`
 
@@ -111,11 +121,7 @@ Run the full local analysis flow plus AI coach:
 python3 scripts/run_analysis.py --ai-coach
 ```
 
-Run a post-game import plus AI coach:
-
-```bash
-python3 scripts/post_game.py --ai-coach
-```
+Without `--ai-coach`, `run_analysis.py` prints only the deterministic evidence path, last-10 record, and one-line top issue.
 
 Each run writes both latest reports side by side:
 
@@ -189,7 +195,7 @@ python3 scripts/analyze_logs.py --input-dir sample_data --output-dir /tmp/projec
 2. Run `python3 scripts/post_game.py`.
 3. Paste the battle log, then type `::END_LOG::` on its own line.
 4. Confirm the inferred opponent, result, first-player, and concession values.
-5. Answer the remaining metadata prompts for date, deck version, ranked points, and notes.
+5. Answer the remaining metadata prompts for date, deck version, ending rank from the previous game/current rank, and notes.
 6. Let Project Arceus run the analysis pipeline.
 7. Review `data/analysis/ai_coach_report.md` if using the AI coach, or `data/analysis/deterministic_analysis.json` for raw evidence.
 8. Optionally run `python3 scripts/run_analysis.py --with-workbook` if you want the full workbook.

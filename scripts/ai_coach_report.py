@@ -66,6 +66,7 @@ def compact_evidence(evidence, last):
         "recent_games": recent_games,
         "success_conditions": evidence.get("success_conditions", []),
         "mulligan_warnings": evidence.get("mulligan_warnings", []),
+        "mulligan_rate": evidence.get("mulligan_rate", {}),
         "card_tracking": evidence.get("card_tracking", [])[:15],
         "annihilape_attack_quality": evidence.get("annihilape_attack_quality", [])[-last:],
         "attack_decision_quality": evidence.get("attack_decision_quality", [])[-30:],
@@ -146,13 +147,12 @@ def terminal_report(markdown, summary):
     labels = [
         ("Verdict", "verdict"),
         ("Why", "why"),
-        ("Biggest Positive", "biggest_positive"),
-        ("Biggest Mistake", "biggest_mistake"),
         ("Experiment Status", "experiment_status"),
         ("Next Focus", "next_focus"),
+        ("Confidence", "confidence"),
     ]
     if summary and "verdict" in summary:
-        lines = ["# Project Arceus AI Coach Report", ""]
+        lines = ["AI Coach", ""]
         for title, key in labels:
             value = str(summary.get(key, "")).strip() or "Not provided"
             lines.extend([f"## {title}", value, ""])
@@ -165,7 +165,7 @@ def terminal_report(markdown, summary):
         if match:
             sections.append(match.group(1).strip())
     if sections:
-        return "# Project Arceus AI Coach Report\n\n" + "\n\n".join(sections[:6]) + "\n"
+        return "AI Coach\n\n" + "\n\n".join(sections[:5]) + "\n"
     return markdown[:1600].rstrip() + "\n"
 
 
@@ -181,6 +181,7 @@ def main():
     parser.add_argument("--output-json", default="data/analysis/ai_coach_report.json")
     parser.add_argument("--prompt-out", default="data/analysis/ai_coach_prompt.json")
     parser.add_argument("--dry-run", action="store_true", help="Write the prompt/context without calling the LLM.")
+    parser.add_argument("--verbose", action="store_true", help="Print the full report and output paths.")
     args = parser.parse_args()
 
     prompt = Path(args.prompt).read_text(encoding="utf-8")
@@ -188,7 +189,7 @@ def main():
     write_json(args.prompt_out, {"prompt": prompt, "context": context, "model": args.model})
 
     if args.dry_run:
-        rendered = "# Project Arceus AI Coach Report\n\nDry run only. Prompt context written to `data/analysis/ai_coach_prompt.json`.\n"
+        rendered = "AI Coach\n\nDry run only. Prompt context written to `data/analysis/ai_coach_prompt.json`.\n"
         summary = {"status": "dry_run", "model": args.model, "prompt_out": args.prompt_out}
     else:
         api_key = os.environ.get("OPENAI_API_KEY")
@@ -210,8 +211,9 @@ def main():
             }
             write_text(args.output_md, rendered)
             write_json(args.output_json, summary)
-            print(rendered)
-            print(f"\nWrote {args.output_md} and {args.output_json}")
+            print(rendered if args.verbose else terminal_report(rendered, summary))
+            if args.verbose:
+                print(f"\nWrote {args.output_md} and {args.output_json}")
             raise
         rendered = response_text(response)
         summary = extract_json_summary(rendered)
@@ -220,8 +222,9 @@ def main():
 
     write_text(args.output_md, rendered)
     write_json(args.output_json, summary)
-    print(terminal_report(rendered, summary))
-    print(f"\nWrote {args.output_md} and {args.output_json}")
+    print(rendered if args.verbose else terminal_report(rendered, summary))
+    if args.verbose:
+        print(f"\nWrote {args.output_md} and {args.output_json}")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.6.2
+
+- Made `scripts/post_game.py` the quiet default one-command workflow with AI on by default, plus `--no-ai`, `--verbose`, and `--last` flags.
+- Made `scripts/run_analysis.py` concise by default and moved full command/report output behind `--verbose`.
+- Updated rank import wording to ask for ranked points before/current rank as the previous game's ending rank.
+- Changed full-power Impact Blow logic to count Lose Cool activation separately from final weakness/resistance-adjusted damage.
+- Added per-SSP attack prize swing/outcome details and mulligan-rate evidence.
+- Removed normal-output command/help text from concise reports.
+
 ## v0.6.1
 
 - Tightened the AI coach prompt to avoid default 280-damage waiting advice and require game evidence for card-specific criticism.

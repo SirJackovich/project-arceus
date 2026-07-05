@@ -2,6 +2,7 @@
 import argparse
 import csv
 import json
+import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -43,7 +44,7 @@ GOALS = [
     {
         "id": "full_power_impact_blow",
         "group": "Damage Engine",
-        "condition": "Attack with at least one full-power 280+ damage Impact Blow.",
+        "condition": "Attack with at least one Lose Cool/full-power Impact Blow.",
         "confidence": "high",
     },
     {
@@ -125,6 +126,33 @@ def met(status, detail):
     return status, detail
 
 
+def impact_engine_worked(events, attack):
+    line_no = int(attack.get("line_no") or 0)
+    turn = attack.get("turn_number")
+    texts = [attack.get("raw_line", "")]
+    for event in events:
+        if event.get("turn_number") != turn:
+            continue
+        current_line = int(event.get("line_no") or 0)
+        if current_line <= line_no:
+            continue
+        if event.get("event_type") == "attack":
+            break
+        texts.append(f"{event.get('raw_line', '')} {event.get('value', '')}")
+    return "Lose Cool" in " ".join(texts)
+
+
+def adjusted_attack_damage(event):
+    damage = int(event.get("amount") or 0) if str(event.get("amount", "")).lstrip("-").isdigit() else 0
+    match = re.search(r"took (-?\d+) (more|less) damage", event.get("raw_line", ""))
+    if not match:
+        return damage
+    delta = int(match.group(1))
+    if match.group(2) == "less" and delta > 0:
+        delta = -delta
+    return damage + delta
+
+
 def evaluate_game(game, events):
     mapping = my_turn_map(events)
     my_events = [e for e in events if e["event_player"] == MY_PLAYER]
@@ -160,7 +188,7 @@ def evaluate_game(game, events):
     first_impact_turn = min([my_turn_index(e, mapping) for e in impact_blows if my_turn_index(e, mapping) > 0], default=0)
     full_impacts = [
         e for e in impact_blows
-        if str(e["amount"]).lstrip("-").isdigit() and int(e["amount"]) >= 280
+        if impact_engine_worked(events, e)
     ]
     risk_by_t2 = [
         e for e in my_events
@@ -239,7 +267,7 @@ def evaluate_game(game, events):
         "damage_engine_before_impact": met("met" if damage_engine_before_impact else ("unknown" if not impact_blows else "missed"),
                                           f"{len(damage_engine_before_impact)} visible engine event(s) before first Impact Blow"),
         "full_power_impact_blow": met("met" if full_impacts else "missed",
-                                     f"{len(full_impacts)} Impact Blow(s) at 280+ damage"),
+                                     f"{len(full_impacts)} Impact Blow(s) with Lose Cool active; final damage tracked separately"),
         "risky_ruins_by_turn2": met("met" if risk_by_t2 else "missed",
                                    f"{len(risk_by_t2)} Risky Ruins play/activation event(s) by T2"),
         "avoid_easy_prize_from_damage": met("unknown" if not easy_prize_missed else "missed",

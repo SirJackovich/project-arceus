@@ -232,6 +232,7 @@ def main():
     parser.add_argument("--filename", help="Override the generated log filename.")
     parser.add_argument("--player", default=DEFAULT_PLAYER)
     parser.add_argument("--source", default="terminal_paste")
+    parser.add_argument("--quiet", action="store_true", help="Suppress post-import command suggestions.")
     args = parser.parse_args()
 
     args.logs_dir.mkdir(parents=True, exist_ok=True)
@@ -257,7 +258,7 @@ def main():
     print("Now add the remaining match metadata. Press Enter to accept defaults.")
     match_date = ask("Match date", default_match_date)
     deck_version = ask("Deck version", args.deck_version)
-    ranked_before = ask("Ranked points before")
+    ranked_before = ask("Ranked points before / ending rank of previous game")
     ranked_after = ask("Ranked points after")
     notes = ask("Short notes")
 
@@ -293,15 +294,12 @@ def main():
     }
     append_manifest(args.manifest, args.manifest_json, row)
 
-    print()
-    print(f"Saved log: {log_path}")
-    print(f"Updated manifest: {args.manifest}")
-    print(f"Updated JSON manifest: {args.manifest_json}")
-    print()
-    print("Next commands:")
-    print("  python3 scripts/analyze_logs.py")
-    print("  python3 scripts/evaluate_success.py")
-    print("  node scripts/build_workbook.mjs")
+    if not args.quiet:
+        print()
+        print(f"Saved Game {game_number}: {inferred['result']} vs {inferred['opponent'] or 'unknown'}")
+        print(f"Saved log: {log_path}")
+        print(f"Updated manifest: {args.manifest}")
+        print(f"Updated JSON manifest: {args.manifest_json}")
     return 0
 
 

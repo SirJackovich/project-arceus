@@ -221,6 +221,13 @@ def append_manifest(manifest_csv_path, manifest_json_path, row):
     write_manifest_json(manifest_json_path, rows)
 
 
+def previous_ending_rank(manifest_path):
+    rows = read_manifest_rows(manifest_path)
+    if not rows:
+        return ""
+    return rows[-1].get("ranked_points_after", "")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Paste a Pokemon TCG Live battle log and save it with match metadata."
@@ -258,7 +265,7 @@ def main():
     print("Now add the remaining match metadata. Press Enter to accept defaults.")
     match_date = ask("Match date", default_match_date)
     deck_version = ask("Deck version", args.deck_version)
-    ranked_before = ask("Ranked points before / ending rank of previous game")
+    ranked_before = ask("Ranked points before", previous_ending_rank(args.manifest))
     ranked_after = ask("Ranked points after")
     notes = ask("Short notes")
 

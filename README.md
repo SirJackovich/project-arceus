@@ -195,7 +195,7 @@ python3 scripts/analyze_logs.py --input-dir sample_data --output-dir /tmp/projec
 2. Run `python3 scripts/post_game.py`.
 3. Paste the battle log, then type `::END_LOG::` on its own line.
 4. Confirm the inferred opponent, result, first-player, and concession values.
-5. Answer the remaining metadata prompts for date, deck version, ending rank from the previous game/current rank, and notes.
+5. Answer the remaining metadata prompts for date, deck version, starting rank, ending rank after this game, and notes. Starting rank defaults to the previous manifest entry's ending rank.
 6. Let Project Arceus run the analysis pipeline.
 7. Review `data/analysis/ai_coach_report.md` if using the AI coach, or `data/analysis/deterministic_analysis.json` for raw evidence.
 8. Optionally run `python3 scripts/run_analysis.py --with-workbook` if you want the full workbook.

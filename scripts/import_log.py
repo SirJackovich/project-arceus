@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Interactively save a pasted Pokemon TCG Live battle log and manifest row."""
+
 import argparse
 import csv
 import json

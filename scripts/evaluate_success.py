@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Evaluate Project Arceus success conditions from parsed battle-log events."""
+
 import argparse
 import csv
 import json

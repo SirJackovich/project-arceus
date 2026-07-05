@@ -1,0 +1,30 @@
+Setup
+SirJackovich chose heads for the opening coin flip.
+SirJackovich won the coin toss.
+SirJackovich decided to go second.
+SirJackovich drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Mankey, Mankey, Risky Ruins, Basic Fighting Energy, Primeape, Annihilape, Fighting Gong
+OpponentFour drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Iron Hands ex, Energy, Switch, Nest Ball, Iono, Boss's Orders, Arven
+SirJackovich played Mankey to the Active Spot.
+SirJackovich played Mankey to the Bench.
+OpponentFour played Iron Hands ex to the Active Spot.
+
+OpponentFour's Turn
+OpponentFour drew a card.
+OpponentFour ended their turn.
+
+SirJackovich's Turn
+SirJackovich drew Basic Fighting Energy.
+SirJackovich played Risky Ruins to the Stadium spot.
+Risky Ruins was activated.
+- SirJackovich put 2 damage counters on SirJackovich's Mankey.
+SirJackovich evolved Mankey to Primeape in the Active Spot.
+SirJackovich evolved Primeape to Annihilape in the Active Spot.
+SirJackovich's Annihilape used Impact Blow on OpponentFour's Iron Hands ex for 280 damage.
+OpponentFour's Iron Hands ex was Knocked Out!
+SirJackovich took 2 Prize cards.
+
+SirJackovich wins.

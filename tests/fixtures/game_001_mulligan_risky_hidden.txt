@@ -1,0 +1,31 @@
+Setup
+SirJackovich chose heads for the opening coin flip.
+SirJackovich won the coin toss.
+SirJackovich decided to go first.
+SirJackovich drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Risky Ruins, Annihilape, Basic Fighting Energy, Dawn, Fighting Gong, Primeape, Poké Pad
+SirJackovich took a mulligan.
+- Cards revealed from Mulligan 1
+   • Risky Ruins, Annihilape, Basic Fighting Energy, Dawn, Fighting Gong, Primeape, Poké Pad
+TestOpponent drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Ralts, Kirlia, Energy, Nest Ball, Professor's Research, Boss's Orders, Iono
+TestOpponent drew 1 more card because SirJackovich took at least 1 mulligan.
+- TestOpponent drew a card.
+SirJackovich played Hawlucha to the Active Spot.
+TestOpponent played Ralts to the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew a card.
+SirJackovich played Poké Pad.
+SirJackovich ended their turn.
+
+TestOpponent's Turn
+TestOpponent's Ralts used Slap on SirJackovich's Hawlucha for 10 damage.
+
+SirJackovich's Turn
+SirJackovich drew a card.
+SirJackovich ended their turn.
+
+TestOpponent wins.

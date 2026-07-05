@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Parse Pokemon TCG Live battle logs into Project Arceus analysis files."""
+
 import argparse
 import csv
 import json
@@ -6,6 +8,7 @@ import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Union
 
 
 MY_PLAYER = "SirJackovich"
@@ -16,18 +19,20 @@ WIN_RE = re.compile(r"([^\s.]+) wins\.$")
 
 @dataclass
 class ActionContext:
+    """Track the card action that subsequent bullet lines belong to."""
+
     player: str
     source_card: str
     source_action: str
     turn_number: int
 
 
-def natural_key(path):
+def natural_key(path: Path) -> list[object]:
     parts = re.split(r"(\d+)", path.stem)
     return [int(p) if p.isdigit() else p.lower() for p in parts]
 
 
-def clean_card(name):
+def clean_card(name: str) -> str:
     if not name:
         return ""
     name = name.strip()
@@ -35,7 +40,7 @@ def clean_card(name):
     return name.strip(" .")
 
 
-def parse_count(text):
+def parse_count(text: str) -> Union[int, str]:
     if text == "a":
         return 1
     try:
@@ -44,7 +49,7 @@ def parse_count(text):
         return ""
 
 
-def csv_write(path, rows, fields):
+def csv_write(path: Path, rows: list[dict], fields: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
@@ -53,7 +58,9 @@ def csv_write(path, rows, fields):
             writer.writerow({field: row.get(field, "") for field in fields})
 
 
-def load_lines(path):
+def load_lines(path: Path) -> list[str]:
+    """Read a log file and ignore any user notes appended after the game."""
+
     raw = path.read_text(encoding="utf-8-sig", errors="replace").splitlines()
     kept = []
     for line in raw:
@@ -63,8 +70,8 @@ def load_lines(path):
     return kept
 
 
-def infer_game_number(path):
-    match = re.match(r"game_(\d+)$", path.stem)
+def infer_game_number(path: Path) -> Union[int, str]:
+    match = re.match(r"game_(\d+)(?:_|$)", path.stem)
     if match:
         return int(match.group(1))
     match = re.match(r"(\d+)_", path.stem)
@@ -73,7 +80,7 @@ def infer_game_number(path):
     return ""
 
 
-def player_from_line(line):
+def player_from_line(line: str) -> str:
     if line.startswith("- ") or line.startswith("•"):
         return ""
     match = re.match(r"^([^-].*?) (?:chose|won|decided|drew|played|attached|retreated|evolved|took|put|shuffled|moved|flipped|ended)\b", line)
@@ -88,9 +95,10 @@ def player_from_line(line):
     return ""
 
 
-def add_event(events, file_name, game_id, line_no, turn_number, turn_player, line, event_type,
-              player="", card_name="", target_card="", amount="", source_card="", source_player="",
-              source_action="", value=""):
+def add_event(events: list[dict], file_name: str, game_id: str, line_no: int, turn_number: int,
+              turn_player: str, line: str, event_type: str, player: str = "", card_name: str = "",
+              target_card: str = "", amount: Union[int, str] = "", source_card: str = "",
+              source_player: str = "", source_action: str = "", value: str = "") -> None:
     event_player = player or player_from_line(line)
     events.append({
         "game_id": game_id,
@@ -112,7 +120,9 @@ def add_event(events, file_name, game_id, line_no, turn_number, turn_player, lin
     })
 
 
-def parse_log(path):
+def parse_log(path: Path) -> tuple[dict, list[dict]]:
+    """Parse one battle log into match metadata plus normalized event rows."""
+
     lines = load_lines(path)
     game_id = path.stem
     game_number = infer_game_number(path)

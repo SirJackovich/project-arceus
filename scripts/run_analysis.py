@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Run the Project Arceus analysis pipeline without importing a new game."""
+
 import argparse
 import json
 import subprocess

@@ -1,0 +1,31 @@
+Setup
+SirJackovich chose heads for the opening coin flip.
+SirJackovich won the coin toss.
+SirJackovich decided to go first.
+SirJackovich drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Mankey, Primeape, Annihilape, Waitress, Basic Fighting Energy, Risky Ruins, Dawn
+Fufu1292 drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Jellicent ex, Energy, Nest Ball, Professor's Research, Iono, Buddy-Buddy Poffin, Switch
+SirJackovich played Mankey to the Active Spot.
+Fufu1292 played Jellicent ex to the Active Spot.
+
+SirJackovich's Turn
+SirJackovich drew Annihilape.
+SirJackovich played Risky Ruins to the Stadium spot.
+SirJackovich evolved Mankey to Primeape in the Active Spot.
+SirJackovich played Waitress.
+- SirJackovich attached Basic Fighting Energy to Primeape in the Active Spot.
+- SirJackovich shuffled their deck.
+SirJackovich evolved Primeape to Annihilape in the Active Spot.
+SirJackovich's Annihilape used Destined Fight on Fufu1292's Jellicent ex for 320 damage.
+Fufu1292's Jellicent ex was Knocked Out!
+SirJackovich took 3 Prize cards.
+
+Fufu1292's Turn
+Fufu1292's Gourgeist ex used Revenge on SirJackovich's Annihilape for 300 damage.
+SirJackovich's Annihilape was Knocked Out!
+Fufu1292 took 2 Prize cards.
+
+SirJackovich wins.

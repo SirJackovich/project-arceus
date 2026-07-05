@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Generate AI coaching reports from deterministic Project Arceus evidence."""
+
 import argparse
 import json
 import os

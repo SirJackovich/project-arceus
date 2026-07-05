@@ -57,6 +57,18 @@ python3 scripts/post_game.py --verbose
 python3 scripts/post_game.py --last 15
 ```
 
+Run the project safety checks before committing:
+
+```bash
+python3 scripts/check_project.py
+```
+
+The repository uses `.githooks/pre-commit` to run that same command before each commit. If hooks are not active after a fresh clone, run:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 Import a pasted battle log:
 
 ```bash
@@ -187,6 +199,12 @@ Analyze only sample logs:
 
 ```bash
 python3 scripts/analyze_logs.py --input-dir sample_data --output-dir /tmp/project-arceus-sample-analysis
+```
+
+Install test dependencies if `check_project.py` reports that pytest is missing:
+
+```bash
+python3 -m pip install -r requirements.txt
 ```
 
 ## Example Workflow

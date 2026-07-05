@@ -1,3 +1,4 @@
-# Project Arceus currently uses the Python standard library only.
+# Runtime scripts use the Python standard library.
+# Test and pre-commit checks require pytest.
 # Network card-detail refreshes shell out to curl.
-
+pytest>=8.0

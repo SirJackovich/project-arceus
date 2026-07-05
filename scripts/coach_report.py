@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Build deterministic evidence reports for the Project Arceus AI coach."""
+
 import argparse
 import csv
 import json

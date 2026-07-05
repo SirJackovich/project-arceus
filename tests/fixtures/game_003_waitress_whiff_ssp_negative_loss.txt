@@ -1,0 +1,32 @@
+Setup
+SirJackovich chose tails for the opening coin flip.
+OpponentThree won the coin toss.
+OpponentThree decided to go first.
+SirJackovich drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Mankey, Primeape, Annihilape, Waitress, Basic Fighting Energy, Hilda, Fighting Gong
+OpponentThree drew 7 cards for the opening hand.
+- 7 drawn cards.
+   • Charizard ex, Charmander, Rare Candy, Energy, Nest Ball, Professor's Research, Iono
+SirJackovich played Mankey to the Active Spot.
+OpponentThree played Charmander to the Active Spot.
+
+OpponentThree's Turn
+OpponentThree drew a card.
+OpponentThree played Nest Ball.
+- OpponentThree shuffled their deck.
+
+SirJackovich's Turn
+SirJackovich drew a card.
+SirJackovich evolved Mankey to Primeape in the Active Spot.
+SirJackovich played Waitress.
+- SirJackovich shuffled their deck.
+SirJackovich evolved Primeape to Annihilape in the Active Spot.
+SirJackovich's Annihilape used Tantrum on OpponentThree's Charizard ex for 80 damage.
+
+OpponentThree's Turn
+OpponentThree's Charizard ex used Burning Darkness on SirJackovich's Annihilape for 300 damage.
+SirJackovich's Annihilape was Knocked Out!
+OpponentThree took 2 Prize cards.
+
+OpponentThree wins.

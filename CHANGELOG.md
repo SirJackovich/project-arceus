@@ -1,5 +1,15 @@
 # Changelog
 
+Each Codex change should add a new entry that says what changed, why it changed, and how to test it.
+
+## v0.7.0
+
+- What changed: Added pytest guardrail coverage with fixture logs for mulligans, hidden final hands, Risky Ruins timing, Waitress attach/whiff tracking, SSP Annihilape attack outcomes, win/loss detection, partial logs, and golden-output facts.
+- What changed: Added `scripts/check_project.py` to run syntax checks, pytest, sample fixture analysis, and expected-output-file verification.
+- What changed: Added a tracked `.githooks/pre-commit` hook that runs `python3 scripts/check_project.py`, plus light parser type hints and main-script docstrings.
+- Why: Future parser and coach changes need a fast local safety net before they touch real match data or coaching recommendations.
+- How to test: Run `python3 scripts/check_project.py`; commits will run the same command through the configured pre-commit hook.
+
 ## v0.6.3
 
 - Updated rank import handling so starting rank defaults to the previous game's ending rank while remaining editable.

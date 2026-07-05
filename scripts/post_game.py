@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Import one pasted battle log and run the normal post-game workflow."""
+
 import argparse
 import csv
 import json

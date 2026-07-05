@@ -6,11 +6,19 @@ An AI-powered coaching system that analyzes Pokemon TCG Live matches, recommends
 
 Project Arceus is a CLI-first coaching tool for reviewing Pokemon TCG Live battle logs. The MVP optimizes for speed, simplicity, and useful post-game feedback: import logs, analyze patterns, compare results against the current deck plan, and prepare concise coaching recommendations.
 
+Project Arceus uses a two-layer coaching system:
+
+- Layer 1: deterministic Python analyzer. It parses logs and writes structured evidence to `data/analysis/deterministic_analysis.json`.
+- Layer 2: AI coach. It sends only the structured evidence, decklist, and experiment state to an LLM, then writes the final coaching report.
+
 ## Current Features
 
 - Parses one or many Pokemon TCG Live battle logs from `data/logs/`.
 - Generates CSV/JSON/XLSX analysis outputs in `data/analysis/`.
 - Tracks game results, opening choices, card usage, attacks, prize events, and success-condition checks.
+- Writes deterministic evidence for AI coaching, including mulligans, card flow, Annihilape attack quality, Risky Ruins timing, evolution bottlenecks, backup attacker state, possible loss factors, and confidence notes.
+- Generates an optional AI-written coach report from deterministic evidence instead of raw logs.
+- Tracks the current deck experiment in `data/experiment_tracker.json`.
 - Stores the current Annihilape deck as `decks/annihilape/v01.json` and `v01.md`.
 - Stores fetched card details in `decks/annihilape/card_details.json` and `card_details.md`.
 - Provides reusable prompt templates for summaries, coaching, and deck recommendations.
@@ -80,6 +88,35 @@ Generate a last-10-games coaching report:
 python3 scripts/coach_report.py --last 10
 ```
 
+This is the deterministic evidence/debug report. The main structured output is:
+
+- `data/analysis/deterministic_analysis.json`
+
+Generate the AI-written coach report:
+
+```bash
+export OPENAI_API_KEY="your-api-key"
+python3 scripts/ai_coach_report.py --last 10
+```
+
+Inspect the AI prompt/context without calling the LLM:
+
+```bash
+python3 scripts/ai_coach_report.py --dry-run
+```
+
+Run the full local analysis flow plus AI coach:
+
+```bash
+python3 scripts/run_analysis.py --ai-coach
+```
+
+Run a post-game import plus AI coach:
+
+```bash
+python3 scripts/post_game.py --ai-coach
+```
+
 Each run writes both latest reports side by side:
 
 - `data/analysis/coach_report.md`
@@ -88,6 +125,27 @@ Each run writes both latest reports side by side:
 - `data/analysis/coach_report_verbose.json`
 
 Each run also saves timestamped copies in `data/coaching_sessions/`.
+
+The AI coach writes:
+
+- `data/analysis/ai_coach_report.md`
+- `data/analysis/ai_coach_report.json`
+- `data/analysis/ai_coach_prompt.json`
+
+Track a deck experiment:
+
+```bash
+python3 scripts/experiment_tracker.py start \
+  --name "Hilda vs Colress" \
+  --changed-cards "Hilda, Colress's Tenacity" \
+  --target-question "Does Hilda improve evolution and energy access?"
+
+python3 scripts/experiment_tracker.py record \
+  --game 47 \
+  --result win \
+  --evidence-for "found Annihilape on time" \
+  --evidence-against "no early Risky Ruins"
+```
 
 Generate a single-game summary for the newest match:
 
@@ -133,7 +191,7 @@ python3 scripts/analyze_logs.py --input-dir sample_data --output-dir /tmp/projec
 4. Confirm the inferred opponent, result, first-player, and concession values.
 5. Answer the remaining metadata prompts for date, deck version, ranked points, and notes.
 6. Let Project Arceus run the analysis pipeline.
-7. Review `data/analysis/coach_report.md`.
+7. Review `data/analysis/ai_coach_report.md` if using the AI coach, or `data/analysis/deterministic_analysis.json` for raw evidence.
 8. Optionally run `python3 scripts/run_analysis.py --with-workbook` if you want the full workbook.
 9. Choose one experiment from `experiments/` or add a new one.
 

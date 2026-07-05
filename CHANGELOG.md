@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.6.0
+
+- Added a two-layer coaching flow with deterministic analyzer evidence and an AI-written coach report.
+- Added `data/analysis/deterministic_analysis.json` as the structured evidence handoff for the AI coach.
+- Added `scripts/ai_coach_report.py` to generate Markdown and JSON coaching reports from analyzer evidence, decklist, and experiment state.
+- Added `prompts/coach_report.md` with concise Pokemon TCG coaching instructions.
+- Added `scripts/experiment_tracker.py` for tracking current card experiments and evidence over a 10-game sample.
+- Added AI coach flags to `scripts/run_analysis.py` and `scripts/post_game.py`.
+
+## v0.5.0
+
+- Added evolution-line assembly analysis for first complete Annihilape line timing.
+- Added evolution bottleneck metrics for missing Mankey, Primeape, and Annihilape.
+- Added visible hand-gap tracking for Annihilape-without-Primeape and Primeape-without-Annihilape scenarios.
+- Added rebuild analysis after the Mankey evolution line is broken by a KO.
+- Replaced the generic first-attack recommendation with a bottleneck-driven coach recommendation.
+- Added a one-sentence Game Narrative section to coach reports.
+
 ## v0.4.1
 
 - Fixed mulligan-hand handling so revealed mulligan cards are tracked separately from playable opening-hand cards.

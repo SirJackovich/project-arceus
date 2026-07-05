@@ -73,14 +73,25 @@ def verbose_output_path(path):
 
 
 def report_payload(payload, report_type):
-    output = dict(payload)
+    output = deterministic_payload(payload)
     output["report_type"] = report_type
     return output
+
+
+def deterministic_payload(payload):
+    evidence = dict(payload)
+    evidence.pop("coach_snapshot", None)
+    evidence.pop("recommendations", None)
+    evidence.pop("game_narrative", None)
+    evidence["layer"] = "deterministic_analyzer"
+    evidence["purpose"] = "Structured evidence for the AI coach. Do not treat this as final coaching advice."
+    return evidence
 
 
 def write_report_outputs(args, concise_rendered, verbose_rendered, payload):
     write_text(args.output_md, concise_rendered)
     write_json(args.output_json, report_payload(payload, "concise"))
+    write_json(Path(args.analysis_dir) / "deterministic_analysis.json", deterministic_payload(payload))
     write_text(verbose_output_path(args.output_md), verbose_rendered)
     write_json(verbose_output_path(args.output_json), report_payload(payload, "verbose"))
     if args.no_snapshot:
@@ -408,6 +419,156 @@ def annihilape_attack_quality(events, selected_games):
     return rows
 
 
+def visible_hand_events(game_events):
+    return [
+        event for event in game_events
+        if event.get("event_player") == MY_PLAYER
+        and event.get("card_name")
+        and event.get("event_type") in {"opening_hand", "turn_draw_known", "known_drawn_card"}
+    ]
+
+
+def first_event(events, predicate):
+    matches = [event for event in events if predicate(event)]
+    matches.sort(key=lambda event: as_int(event.get("line_no")))
+    return matches[0] if matches else None
+
+
+def evolution_line_analysis(events, selected_games):
+    selected_ids = {game["game_id"] for game in selected_games}
+    grouped = group_events_by_game(events, selected_ids)
+    rows = []
+    bottlenecks = Counter({
+        "missing Mankey": 0,
+        "missing Primeape": 0,
+        "missing Annihilape": 0,
+        "completed by Turn 4": 0,
+        "unknown/no visible Mankey": 0,
+    })
+    hand_gaps = Counter({
+        "Annihilape in hand, no Primeape": 0,
+        "Primeape in hand/play, no Annihilape": 0,
+    })
+
+    for game in selected_games:
+        game_id = game["game_id"]
+        game_events = grouped[game_id]
+        mapping = my_turn_map(game_events)
+        mine = [event for event in game_events if event.get("event_player") == MY_PLAYER]
+        hand_events = visible_hand_events(game_events)
+
+        first_mankey = first_event(
+            mine,
+            lambda event: event.get("card_name") == "Mankey" and event.get("event_type") in {"active_pokemon", "bench_pokemon"},
+        )
+        first_primeape = first_event(
+            mine,
+            lambda event: event.get("card_name") == "Primeape" and event.get("event_type") in {"evolve", "active_pokemon", "bench_pokemon"},
+        )
+        first_annihilape_completion = first_event(
+            mine,
+            lambda event: event.get("card_name") == "Annihilape" and event.get("event_type") == "evolve",
+        )
+        first_annihilape_seen = first_event(hand_events, lambda event: event.get("card_name") == "Annihilape")
+        first_primeape_seen = first_event(
+            mine + hand_events,
+            lambda event: event.get("card_name") == "Primeape"
+            and event.get("event_type") in {"opening_hand", "turn_draw_known", "known_drawn_card", "evolve", "active_pokemon", "bench_pokemon"},
+        )
+
+        completion_turn = my_turn_index(first_annihilape_completion, mapping) if first_annihilape_completion else 0
+        hidden_or_mulligan = (
+            as_int(game.get("my_mulligans")) > 0
+            or game.get("my_opening_hand_visibility") in {"hidden", "hidden_after_mulligan"}
+        )
+        mankey_turn = my_turn_index(first_mankey, mapping) if first_mankey else 0
+        primeape_turn = my_turn_index(first_primeape, mapping) if first_primeape else 0
+
+        if completion_turn and completion_turn <= 4:
+            bottleneck = "completed by Turn 4"
+        elif not first_mankey:
+            bottleneck = "unknown/no visible Mankey" if hidden_or_mulligan else "missing Mankey"
+        elif not first_primeape:
+            bottleneck = "missing Primeape"
+        else:
+            bottleneck = "missing Annihilape"
+        bottlenecks[bottleneck] += 1
+
+        annihilape_without_primeape = bool(
+            first_annihilape_seen
+            and (not first_primeape or as_int(first_annihilape_seen.get("line_no")) < as_int(first_primeape.get("line_no")))
+        )
+        primeape_without_annihilape = bool(
+            first_primeape_seen
+            and not first_annihilape_completion
+            and not first_annihilape_seen
+        )
+        if annihilape_without_primeape:
+            hand_gaps["Annihilape in hand, no Primeape"] += 1
+        if primeape_without_annihilape:
+            hand_gaps["Primeape in hand/play, no Annihilape"] += 1
+
+        rows.append({
+            "game": game_label(game_id),
+            "game_id": game_id,
+            "first_completion_turn": completion_turn or "none",
+            "completed_by_turn4": "yes" if completion_turn and completion_turn <= 4 else "no",
+            "bottleneck": bottleneck,
+            "mankey_turn": mankey_turn or "none",
+            "primeape_turn": primeape_turn or "none",
+            "annihilape_seen_turn": my_turn_index(first_annihilape_seen, mapping) if first_annihilape_seen else "none",
+            "annihilape_in_hand_no_primeape": "yes" if annihilape_without_primeape else "no",
+            "primeape_no_annihilape": "yes" if primeape_without_annihilape else "no",
+        })
+
+    miss_total = sum(count for label, count in bottlenecks.items() if label != "completed by Turn 4")
+    return {
+        "rows": rows,
+        "bottlenecks": dict(bottlenecks),
+        "hand_gaps": dict(hand_gaps),
+        "miss_total": miss_total,
+    }
+
+
+def rebuild_after_line_break(events, selected_games):
+    selected_ids = {game["game_id"] for game in selected_games}
+    grouped = group_events_by_game(events, selected_ids)
+    rows = []
+    for game in selected_games:
+        game_id = game["game_id"]
+        game_events = grouped[game_id]
+        mine = [event for event in game_events if event.get("event_player") == MY_PLAYER]
+        break_event = first_event(
+            mine,
+            lambda event: event.get("event_type") == "knockout_received"
+            and event.get("card_name") in {"Mankey", "Primeape", "Annihilape"}
+            and event.get("source_player") != MY_PLAYER,
+        )
+        if not break_event:
+            rows.append({"game": game_label(game_id), "game_id": game_id, "state": "not tested", "evidence": "No visible KO of the Mankey line."})
+            continue
+
+        break_line = as_int(break_event.get("line_no"))
+        after = [event for event in mine if as_int(event.get("line_no")) > break_line]
+        rebuilt_annihilape = first_event(after, lambda event: event.get("event_type") == "evolve" and event.get("card_name") == "Annihilape")
+        partial = first_event(
+            after,
+            lambda event: event.get("card_name") in {"Mankey", "Primeape", "Annihilape"}
+            and event.get("event_type") in {"active_pokemon", "bench_pokemon", "evolve", "turn_draw_known", "known_drawn_card"},
+        )
+        if rebuilt_annihilape:
+            state = "rebuilt complete line"
+            evidence = rebuilt_annihilape.get("raw_line", "")
+        elif partial:
+            state = "partial rebuild"
+            evidence = partial.get("raw_line", "")
+        else:
+            state = "no visible rebuild"
+            evidence = break_event.get("raw_line", "")
+        rows.append({"game": game_label(game_id), "game_id": game_id, "state": state, "evidence": evidence})
+    return rows
+
+
 def backup_attacker_summary(events, selected_games):
     selected_ids = {game["game_id"] for game in selected_games}
     grouped = group_events_by_game(events, selected_ids)
@@ -712,6 +873,113 @@ def card_recommendations(card_effectiveness, event_data):
     return recs
 
 
+def dominant_evolution_recommendation(evolution_analysis):
+    miss_total = evolution_analysis.get("miss_total", 0)
+    if not miss_total:
+        return None
+    bottlenecks = evolution_analysis.get("bottlenecks", {})
+    candidates = [
+        ("missing Annihilape", "Stage 2 access", "Improve Annihilape access before touching Rare Candy or Energy counts.", "For the next 10 games, record whether Primeape was online before Annihilape was found."),
+        ("missing Primeape", "Stage 1 access", "Improve Primeape access or evolution sequencing before changing attack support cards.", "For the next 10 games, record whether Mankey survived long enough to become Primeape."),
+        ("missing Mankey", "Basic setup", "Improve early Mankey setup before tuning the late-game package.", "For the next 10 games, track whether two Mankey are in play by your Turn 3."),
+        ("unknown/no visible Mankey", "hidden Basic setup", "Treat the Basic setup miss as low-confidence because the hand was hidden; verify whether Mankey was actually unavailable or just not visible in the log.", "For the next 10 games, note whether opening hand had Mankey after mulligans."),
+    ]
+    dominant = max(candidates, key=lambda item: bottlenecks.get(item[0], 0))
+    label, theme, recommendation, experiment = dominant
+    count = bottlenecks.get(label, 0)
+    if count == 0:
+        return None
+    share = count / miss_total
+    evidence = [row["game"] for row in evolution_analysis.get("rows", []) if row.get("bottleneck") == label][:5]
+    confidence = "high" if share > 0.5 and count >= 3 else "medium" if count >= 2 else "low"
+    return {
+        "observation": f"Evolution bottleneck: {theme} appears in {count}/{miss_total} incomplete-line games ({pct(count, miss_total)}%).",
+        "evidence": evidence,
+        "recommendation": recommendation,
+        "confidence": confidence,
+        "next_experiment": experiment,
+    }
+
+
+def possible_loss_factors_from_evidence(evolution_analysis, line_rebuild, goals, mulligans):
+    factors = []
+    miss_total = evolution_analysis.get("miss_total", 0)
+    bottlenecks = evolution_analysis.get("bottlenecks", {})
+    if miss_total:
+        for label in ["missing Annihilape", "missing Primeape", "missing Mankey", "unknown/no visible Mankey"]:
+            count = bottlenecks.get(label, 0)
+            if not count:
+                continue
+            evidence = [row["game"] for row in evolution_analysis.get("rows", []) if row.get("bottleneck") == label][:5]
+            confidence = "high" if count / miss_total > 0.5 and count >= 3 else "medium" if count >= 2 else "low"
+            factors.append({
+                "factor": label,
+                "category": "evolution bottleneck",
+                "count": count,
+                "sample": miss_total,
+                "evidence": evidence,
+                "confidence": "low" if label.startswith("unknown") else confidence,
+            })
+    rebuild_counts = Counter(row["state"] for row in line_rebuild)
+    if rebuild_counts.get("no visible rebuild", 0):
+        factors.append({
+            "factor": "no visible rebuild after line break",
+            "category": "rebuild",
+            "count": rebuild_counts["no visible rebuild"],
+            "sample": len(line_rebuild),
+            "evidence": [row["game"] for row in line_rebuild if row["state"] == "no visible rebuild"][:5],
+            "confidence": "medium",
+        })
+    for goal in goals:
+        if goal.get("missed", 0) and goal.get("confidence") != "low":
+            factors.append({
+                "factor": goal.get("condition", ""),
+                "category": goal.get("goal_group", ""),
+                "count": goal.get("missed", 0),
+                "sample": goal.get("games", 0),
+                "evidence": goal.get("missed_games", [])[:5],
+                "confidence": goal.get("confidence", "medium"),
+            })
+    if mulligans:
+        factors.append({
+            "factor": "hidden hand after mulligan",
+            "category": "confidence warning",
+            "count": len(mulligans),
+            "sample": len(mulligans),
+            "evidence": [row["game"] for row in mulligans[:5]],
+            "confidence": "low",
+        })
+    return factors[:12]
+
+
+def game_narrative(evolution, line_rebuild):
+    bottlenecks = evolution.get("bottlenecks", {})
+    rows = evolution.get("rows", [])
+    miss_total = evolution.get("miss_total", 0)
+    if not rows:
+        return "Not enough visible game data to describe the pattern yet."
+    completed = bottlenecks.get("completed by Turn 4", 0)
+    dominant_label = ""
+    if miss_total:
+        dominant_label = max(
+            (label for label in bottlenecks if label != "completed by Turn 4"),
+            key=lambda label: bottlenecks.get(label, 0),
+            default="",
+        )
+    rebuild_counts = Counter(row["state"] for row in line_rebuild)
+    if dominant_label == "missing Annihilape":
+        return "The deck often established the lower evolution line, but stalled before finding Annihilape and lost pressure."
+    if dominant_label == "missing Primeape":
+        return "The deck found Basic setup often enough, but the line frequently stalled before Primeape came online."
+    if dominant_label in {"missing Mankey", "unknown/no visible Mankey"}:
+        return "The deck's losses most often start with an unstable Mankey setup, making the rest of the evolution plan late or invisible."
+    if rebuild_counts.get("no visible rebuild", 0):
+        return "The first evolution line usually appears, but rebuilds after a KO are not consistently visible."
+    if completed:
+        return "The deck usually assembles Annihilape, so the next gains are more likely in damage math and rebuild planning."
+    return "The current sample does not show one dominant evolution-line failure pattern yet."
+
+
 def friendly_condition(condition):
     replacements = {
         "Attack with at least one full-power 280+ damage Impact Blow.": "Full-power Impact Blow",
@@ -773,10 +1041,10 @@ def coach_snapshot(summary, goals, recommendations):
     strength = group_labels.get(group_scores[0][1], group_scores[0][1]) if group_scores else "No clear strength yet"
     weakness = friendly_condition(miss_goals[0]["condition"]) if miss_goals else "No clear weakness in this sample"
     focus = recommendations[0]["next_experiment"] if recommendations else "Keep collecting clean logs."
+    if recommendations and recommendations[0].get("observation", "").startswith("Evolution bottleneck:"):
+        weakness = recommendations[0]["observation"].split("Evolution bottleneck:", 1)[1].split(" appears", 1)[0].strip()
 
-    if any(goal["goal_id"] == "annihilape_attack_by_turn4" for goal in miss_goals[:2]):
-        focus = "Get 2 Mankey down early, enable 280 damage, and have a backup attacker plan before first Annihilape dies."
-    elif miss_goals and miss_goals[0]["goal_id"] == "full_power_impact_blow":
+    if miss_goals and miss_goals[0]["goal_id"] == "full_power_impact_blow":
         focus = "Set up enough damage counters before the first Impact Blow."
 
     return {
@@ -804,16 +1072,23 @@ def build_report(args):
     event_data = event_summary(events, selected_ids, deck_cards)
     card_tracking = card_tracking_summary(events, selected_ids, deck_cards)
     attack_quality = annihilape_attack_quality(events, selected_games)
+    evolution_line = evolution_line_analysis(events, selected_games)
+    line_rebuild = rebuild_after_line_break(events, selected_games)
     backup_attackers = backup_attacker_summary(events, selected_games)
     stadium = stadium_quality(events, selected_games)
     miss_reasons = annihilape_miss_reasons(events, selected_games, success_rows)
     mulligans = mulligan_warnings(selected_games)
+    possible_loss_factors = possible_loss_factors_from_evidence(evolution_line, line_rebuild, goals, mulligans)
 
     recommendations = []
+    evolution_rec = dominant_evolution_recommendation(evolution_line)
+    if evolution_rec:
+        recommendations.append(evolution_rec)
     recommendations.extend(
         recommendation_for_goal(goal)
         for goal in goals
         if goal["missed"] > 0 and goal.get("confidence") != "low"
+        and goal.get("goal_id") != "annihilape_attack_by_turn4"
     )
     recommendations.extend(card_recommendations(card_effectiveness, event_data))
     recommendations = recommendations[:args.max_recommendations]
@@ -837,10 +1112,14 @@ def build_report(args):
         "events": event_data,
         "card_tracking": card_tracking,
         "annihilape_attack_quality": attack_quality,
+        "evolution_line": evolution_line,
+        "line_rebuild": line_rebuild,
         "backup_attacker": backup_attackers,
         "stadium_quality": stadium,
         "annihilape_attack_miss_reasons": miss_reasons,
         "mulligan_warnings": mulligans,
+        "possible_loss_factors": possible_loss_factors,
+        "game_narrative": game_narrative(evolution_line, line_rebuild),
         "coach_snapshot": snapshot,
         "recommendations": recommendations,
     }
@@ -850,7 +1129,7 @@ def build_report(args):
 def render_report(payload):
     summary = payload["summary"]
     lines = []
-    lines.append("# Project Arceus Coach Report")
+    lines.append("# Project Arceus Deterministic Evidence Report")
     lines.append("")
     lines.append(f"Scope: {payload['scope']}")
     lines.append(f"Record: {summary['wins']}-{summary['losses']} ({summary['win_rate']}% win rate)")
@@ -858,8 +1137,6 @@ def render_report(payload):
         f"Went first: {summary['went_first_wins']}/{summary['went_first']} wins; "
         f"went second: {summary['went_second_wins']}/{summary['went_second']} wins"
     )
-    if payload["recommendations"]:
-        lines.append(f"Next experiment: {payload['recommendations'][0]['next_experiment']}")
     lines.append("")
 
     lines.append("## Recent Games")
@@ -916,6 +1193,29 @@ def render_report(payload):
         )
     lines.append("")
 
+    lines.append("## Evolution Line Assembly")
+    evolution = payload["evolution_line"]
+    rows = evolution.get("rows", [])
+    completed_by_t4 = sum(1 for row in rows if row.get("completed_by_turn4") == "yes")
+    lines.append(f"- First complete Annihilape line by Turn 4: {completed_by_t4}/{len(rows)}")
+    for label in ["missing Mankey", "missing Primeape", "missing Annihilape", "unknown/no visible Mankey"]:
+        count = evolution.get("bottlenecks", {}).get(label, 0)
+        if count:
+            evidence = [row["game"] for row in rows if row.get("bottleneck") == label][:5]
+            lines.append(f"- {label}: {count} ({', '.join(evidence)})")
+    hand_gaps = evolution.get("hand_gaps", {})
+    lines.append(f"- Annihilape in hand, no Primeape: {hand_gaps.get('Annihilape in hand, no Primeape', 0)}")
+    lines.append(f"- Primeape in hand/play, no Annihilape: {hand_gaps.get('Primeape in hand/play, no Annihilape', 0)}")
+    lines.append("")
+
+    lines.append("## Rebuild After Line Break")
+    rebuild_counts = Counter(row["state"] for row in payload["line_rebuild"])
+    for state in ["rebuilt complete line", "partial rebuild", "no visible rebuild", "not tested"]:
+        if rebuild_counts[state]:
+            evidence = [row["game"] for row in payload["line_rebuild"] if row["state"] == state][:5]
+            lines.append(f"- {state}: {rebuild_counts[state]} ({', '.join(evidence)})")
+    lines.append("")
+
     lines.append("## Annihilape Attack Quality")
     for row in payload["annihilape_attack_quality"][-6:]:
         if row["first_attack_turn"] == "none":
@@ -947,7 +1247,7 @@ def render_report(payload):
     lines.append(f"- First full-power Annihilape depended on it: {len(depended)} game(s)")
     lines.append("")
 
-    lines.append("## First Annihilape Attack Miss Reason")
+    lines.append("## Legacy First Attack Miss Reason")
     reason_counts = payload["annihilape_attack_miss_reasons"]["counts"]
     for label in [
         "no Mankey",
@@ -969,33 +1269,20 @@ def render_report(payload):
     lines.append("Note: these are log-derived heuristics; hidden hand/prize state can make the true reason ambiguous.")
     lines.append("")
 
-    lines.append("## Recommendations")
-    for rec in payload["recommendations"]:
-        lines.append(f"- Observation: {rec['observation']}")
-        lines.append(f"  Evidence: {', '.join(rec['evidence']) if rec['evidence'] else 'none'}")
-        lines.append(f"  Recommendation: {rec['recommendation']}")
-        lines.append(f"  Confidence: {rec['confidence']}")
-        lines.append(f"  Next experiment: {rec['next_experiment']}")
+    lines.append("## Possible Loss Factors")
+    for factor in payload.get("possible_loss_factors", [])[:8]:
+        evidence = ", ".join(factor.get("evidence", [])) or "none"
+        lines.append(
+            f"- {factor.get('factor', '')}: {factor.get('count', 0)}/{factor.get('sample', 0)} "
+            f"({factor.get('confidence', 'medium')} confidence; {evidence})"
+        )
     return "\n".join(lines) + "\n"
 
 
 def render_concise_report(payload):
     summary = payload["summary"]
-    snapshot = payload["coach_snapshot"]
     lines = []
-    lines.append("# Project Arceus Coach Report")
-    lines.append("")
-    lines.append("## Coach Grade")
-    lines.append(snapshot["grade"])
-    lines.append("")
-    lines.append("## Biggest Strength")
-    lines.append(snapshot["biggest_strength"])
-    lines.append("")
-    lines.append("## Biggest Weakness")
-    lines.append(snapshot["biggest_weakness"])
-    lines.append("")
-    lines.append("## Today's Focus")
-    lines.append(snapshot["todays_focus"])
+    lines.append("# Project Arceus Deterministic Evidence Report")
     lines.append("")
     lines.append("## Quick Stats")
     lines.append(f"- Scope: {payload['scope']}")
@@ -1031,13 +1318,20 @@ def render_concise_report(payload):
             )
         lines.append("")
 
-    lines.append("## First Annihilape Attack Miss Reason")
-    reason_counts = payload["annihilape_attack_miss_reasons"]["counts"]
-    for label in ["no Mankey", "unknown/no visible Mankey", "no Primeape/evolution", "no Annihilape", "no energy", "no damage counters / Lose Cool inactive", "KO/disruption"]:
-        lines.append(f"- {label}: {reason_counts.get(label, 0)}")
-    unknown = reason_counts.get("unknown", 0)
-    if unknown:
-        lines.append(f"- unknown: {unknown}")
+    lines.append("## Evolution Bottleneck")
+    evolution = payload["evolution_line"]
+    rows = evolution.get("rows", [])
+    completed_by_t4 = sum(1 for row in rows if row.get("completed_by_turn4") == "yes")
+    lines.append(f"- Complete line by Turn 4: {completed_by_t4}/{len(rows)}")
+    for label in ["missing Mankey", "missing Primeape", "missing Annihilape", "unknown/no visible Mankey"]:
+        count = evolution.get("bottlenecks", {}).get(label, 0)
+        if count:
+            evidence = [row["game"] for row in rows if row.get("bottleneck") == label][:4]
+            lines.append(f"- {label}: {count} ({', '.join(evidence)})")
+    hand_gaps = evolution.get("hand_gaps", {})
+    for label in ["Annihilape in hand, no Primeape", "Primeape in hand/play, no Annihilape"]:
+        if hand_gaps.get(label, 0):
+            lines.append(f"- {label}: {hand_gaps[label]}")
     lines.append("")
 
     attack_rows = payload["annihilape_attack_quality"][-3:]
@@ -1067,17 +1361,21 @@ def render_concise_report(payload):
     lines.append(f"- Risky Ruins by Turn 2: {len(risky_by_t2)}/{len(stadium_rows)}")
     lines.append("")
 
-    if payload["recommendations"]:
-        rec = payload["recommendations"][0]
-        lines.append("## Coach Note")
-        lines.append(rec["recommendation"])
-        lines.append(f"Evidence: {', '.join(rec['evidence']) if rec['evidence'] else 'none'}")
-        lines.append(f"Confidence: {rec['confidence']}")
+    factors = payload.get("possible_loss_factors", [])[:5]
+    if factors:
+        lines.append("## Possible Loss Factors")
+        for factor in factors:
+            evidence = ", ".join(factor.get("evidence", [])[:4]) or "none"
+            lines.append(
+                f"- {factor.get('factor', '')}: {factor.get('count', 0)}/{factor.get('sample', 0)} "
+                f"({factor.get('confidence', 'medium')} confidence; {evidence})"
+            )
         lines.append("")
 
     lines.append("## Commands")
     lines.append("- New match: `python3 scripts/post_game.py`")
-    lines.append("- Detailed report: `python3 scripts/coach_report.py --last 10 --verbose`")
+    lines.append("- AI coach report: `python3 scripts/ai_coach_report.py --last 10`")
+    lines.append("- Detailed evidence: `python3 scripts/coach_report.py --last 10 --verbose`")
     return "\n".join(lines) + "\n"
 
 

@@ -2,6 +2,15 @@
 
 Each Codex change should add a new entry that says what changed, why it changed, and how to test it.
 
+## v0.8.0
+
+- What changed: Split AI coaching into `scripts/game_coach.py` for the current game and `scripts/deck_coach.py` for last-N-game deck review trends.
+- What changed: Added separate `prompts/game_coach.md` and `prompts/deck_coach.md`, with the old `scripts/ai_coach_report.py` kept as a Deck Coach compatibility wrapper.
+- What changed: Updated `scripts/post_game.py` so Game Coach runs after every imported game, while Deck Coach runs with `--deck-review` or when the active experiment reaches its target game count.
+- What changed: Added Game Coach and Deck Coach dry runs to `scripts/check_project.py`.
+- Why: Per-game coaching and deck-review coaching answer different questions and should not mix current-game advice with trend analysis.
+- How to test: Run `python3 scripts/check_project.py`, then use `python3 scripts/post_game.py --ai-dry-run` or `python3 scripts/post_game.py --deck-review --ai-dry-run`.
+
 ## v0.7.0
 
 - What changed: Added pytest guardrail coverage with fixture logs for mulligans, hidden final hands, Risky Ruins timing, Waitress attach/whiff tracking, SSP Annihilape attack outcomes, win/loss detection, partial logs, and golden-output facts.

@@ -9,7 +9,7 @@ Project Arceus is a CLI-first coaching tool for reviewing Pokemon TCG Live battl
 Project Arceus uses a two-layer coaching system:
 
 - Layer 1: deterministic Python analyzer. It parses logs and writes structured evidence to `data/analysis/deterministic_analysis.json`.
-- Layer 2: AI coach. It sends only the structured evidence, decklist, and experiment state to an LLM, then writes the final coaching report.
+- Layer 2: AI coaches. Game Coach reviews only the current game; Deck Coach reviews last-N-game trends, deck construction, and experiment results.
 
 ## Current Features
 
@@ -17,7 +17,7 @@ Project Arceus uses a two-layer coaching system:
 - Generates CSV/JSON/XLSX analysis outputs in `data/analysis/`.
 - Tracks game results, opening choices, card usage, attacks, prize events, and success-condition checks.
 - Writes deterministic evidence for AI coaching, including mulligans, card flow, Annihilape attack quality, Risky Ruins timing, evolution bottlenecks, backup attacker state, possible loss factors, and confidence notes.
-- Generates an optional AI-written coach report from deterministic evidence instead of raw logs.
+- Generates optional AI-written Game Coach and Deck Coach reports from deterministic evidence instead of raw logs.
 - Tracks the current deck experiment in `data/experiment_tracker.json`.
 - Stores the current Annihilape deck as `decks/annihilape/v01.json` and `v01.md`.
 - Stores fetched card details in `decks/annihilape/card_details.json` and `card_details.md`.
@@ -47,15 +47,18 @@ Import the latest pasted battle log and run the coach analysis:
 python3 scripts/post_game.py
 ```
 
-This is the normal one-command workflow. It imports the pasted log, runs deterministic analysis, then runs the AI coach for the last 10 games.
+This is the normal one-command workflow. It imports the pasted log, runs deterministic analysis, then runs Game Coach for the newest match.
 
 Useful options:
 
 ```bash
 python3 scripts/post_game.py --no-ai
+python3 scripts/post_game.py --deck-review
 python3 scripts/post_game.py --verbose
 python3 scripts/post_game.py --last 15
 ```
+
+By default, `post_game.py` runs Game Coach for the newest match. Deck Coach runs when you pass `--deck-review` or when the active experiment tracker reaches its target game count.
 
 Run the project safety checks before committing:
 
@@ -114,20 +117,28 @@ The main structured output is:
 
 - `data/analysis/deterministic_analysis.json`
 
-Generate the AI-written coach report:
+Generate the AI-written Game Coach report for the latest match:
 
 ```bash
 export OPENAI_API_KEY="your-api-key"
-python3 scripts/ai_coach_report.py --last 10
+python3 scripts/game_coach.py --game latest
+```
+
+Generate the AI-written Deck Coach report for the last 10 games:
+
+```bash
+export OPENAI_API_KEY="your-api-key"
+python3 scripts/deck_coach.py --last 10
 ```
 
 Inspect the AI prompt/context without calling the LLM:
 
 ```bash
-python3 scripts/ai_coach_report.py --dry-run
+python3 scripts/game_coach.py --dry-run
+python3 scripts/deck_coach.py --dry-run
 ```
 
-Run the full local analysis flow plus AI coach:
+Run the full local analysis flow plus Deck Coach:
 
 ```bash
 python3 scripts/run_analysis.py --ai-coach
@@ -144,11 +155,17 @@ Each run writes both latest reports side by side:
 
 Each run also saves timestamped copies in `data/coaching_sessions/`.
 
-The AI coach writes:
+The Game Coach writes:
 
-- `data/analysis/ai_coach_report.md`
-- `data/analysis/ai_coach_report.json`
-- `data/analysis/ai_coach_prompt.json`
+- `data/analysis/game_coach_report.md`
+- `data/analysis/game_coach_report.json`
+- `data/analysis/game_coach_prompt.json`
+
+The Deck Coach writes:
+
+- `data/analysis/deck_coach_report.md`
+- `data/analysis/deck_coach_report.json`
+- `data/analysis/deck_coach_prompt.json`
 
 Track a deck experiment:
 
@@ -215,7 +232,7 @@ python3 -m pip install -r requirements.txt
 4. Confirm the inferred opponent, result, first-player, and concession values.
 5. Answer the remaining metadata prompts for date, deck version, starting rank, ending rank after this game, and notes. Starting rank defaults to the previous manifest entry's ending rank.
 6. Let Project Arceus run the analysis pipeline.
-7. Review `data/analysis/ai_coach_report.md` if using the AI coach, or `data/analysis/deterministic_analysis.json` for raw evidence.
+7. Review `data/analysis/game_coach_report.md` for the current game, `data/analysis/deck_coach_report.md` after a deck review, or `data/analysis/deterministic_analysis.json` for raw evidence.
 8. Optionally run `python3 scripts/run_analysis.py --with-workbook` if you want the full workbook.
 9. Choose one experiment from `experiments/` or add a new one.
 

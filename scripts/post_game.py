@@ -11,6 +11,7 @@ from pathlib import Path
 
 ANALYSIS_DIR = Path("data/analysis")
 MANIFEST = Path("data/manifest.csv")
+EXPERIMENT_STATE = Path("data/experiment_tracker.json")
 
 
 def run_step(command, verbose=False, allow_failure=False):
@@ -75,10 +76,24 @@ def print_saved_summary():
     print(f"Saved Game {game_number_from_id(row.get('game_id', ''))}: {row.get('result', 'unknown')} vs {row.get('opponent', 'unknown') or 'unknown'}")
 
 
+def experiment_review_due():
+    state = read_json(EXPERIMENT_STATE)
+    experiment = state.get("current_experiment") if isinstance(state, dict) else None
+    if not experiment or experiment.get("status") not in {"active", ""}:
+        return False
+    try:
+        target = int(experiment.get("target_games") or 10)
+    except (TypeError, ValueError):
+        target = 10
+    games = experiment.get("games") or []
+    return len(games) >= target
+
+
 def main():
     parser = argparse.ArgumentParser(description="Import a battle log and run the normal Project Arceus post-game workflow.")
     parser.add_argument("--last", type=int, default=10, help="Number of recent games for the AI coach report.")
     parser.add_argument("--no-ai", action="store_true", help="Skip the AI coach and print deterministic evidence path only.")
+    parser.add_argument("--deck-review", action="store_true", help="Also run the last-N-games Deck Coach after the Game Coach.")
     parser.add_argument("--verbose", action="store_true", help="Show command output, deterministic evidence, and full AI report.")
     parser.add_argument("--ai-dry-run", action="store_true", help="Write AI prompt/context without calling the LLM.")
     args = parser.parse_args()
@@ -106,19 +121,35 @@ def main():
         print(top_issue_line())
         return 0
 
-    ai_command = [sys.executable, "scripts/ai_coach_report.py", "--last", str(args.last)]
+    game_command = [sys.executable, "scripts/game_coach.py", "--game", "latest"]
     if args.ai_dry_run:
-        ai_command.append("--dry-run")
+        game_command.append("--dry-run")
     if args.verbose:
-        ai_command.append("--verbose")
-    result = run_step(ai_command, verbose=args.verbose, allow_failure=True)
+        game_command.append("--verbose")
+    result = run_step(game_command, verbose=args.verbose, allow_failure=True)
     if args.verbose:
+        if args.deck_review or experiment_review_due():
+            deck_command = [sys.executable, "scripts/deck_coach.py", "--last", str(args.last), "--verbose"]
+            if args.ai_dry_run:
+                deck_command.append("--dry-run")
+            run_step(deck_command, verbose=True, allow_failure=True)
         return 0
     if result.stdout:
         print()
         print(result.stdout.strip())
     if result.returncode:
-        print("AI coach unavailable. Deterministic evidence was still generated.")
+        print("Game Coach unavailable. Deterministic evidence was still generated.")
+
+    if args.deck_review or experiment_review_due():
+        deck_command = [sys.executable, "scripts/deck_coach.py", "--last", str(args.last)]
+        if args.ai_dry_run:
+            deck_command.append("--dry-run")
+        deck_result = run_step(deck_command, verbose=False, allow_failure=True)
+        if deck_result.stdout:
+            print()
+            print(deck_result.stdout.strip())
+        if deck_result.returncode:
+            print("Deck Coach unavailable. Deterministic evidence was still generated.")
     return 0
 
 

@@ -61,7 +61,8 @@ def main():
     parser.add_argument("--with-workbook", action="store_true", help="Also rebuild the XLSX workbook.")
     parser.add_argument("--verbose", action="store_true", help="Show command output and full reports.")
     parser.add_argument("--verbose-coach", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--ai-coach", action="store_true", help="Generate the final AI-written coach report from deterministic evidence.")
+    parser.add_argument("--ai-coach", action="store_true", help="Generate the AI-written Deck Coach report from deterministic evidence.")
+    parser.add_argument("--game-coach", action="store_true", help="Generate the AI-written Game Coach report for the latest game.")
     parser.add_argument("--ai-dry-run", action="store_true", help="Write the AI prompt/context without calling the LLM.")
     args = parser.parse_args()
     verbose = args.verbose or args.verbose_coach
@@ -75,8 +76,21 @@ def main():
     if args.with_workbook:
         run_step(["node", "scripts/build_workbook.mjs"], verbose=verbose)
 
+    if args.game_coach:
+        game_command = [sys.executable, "scripts/game_coach.py", "--game", "latest"]
+        if args.ai_dry_run:
+            game_command.append("--dry-run")
+        if verbose:
+            game_command.append("--verbose")
+        ok, output = run_step(game_command, verbose=verbose, allow_failure=True)
+        if not verbose and output:
+            print(output.strip())
+        if not ok and not verbose:
+            print("Game Coach unavailable. Deterministic evidence was still generated.")
+        return 0
+
     if args.ai_coach or args.ai_dry_run:
-        ai_command = [sys.executable, "scripts/ai_coach_report.py", "--last", str(args.last)]
+        ai_command = [sys.executable, "scripts/deck_coach.py", "--last", str(args.last)]
         if args.ai_dry_run:
             ai_command.append("--dry-run")
         if verbose:
@@ -85,7 +99,7 @@ def main():
         if not verbose and output:
             print(output.strip())
         if not ok and not verbose:
-            print("AI coach unavailable. Deterministic evidence was still generated.")
+            print("Deck Coach unavailable. Deterministic evidence was still generated.")
         return 0
 
     if verbose:

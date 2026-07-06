@@ -86,6 +86,42 @@ def sample_analysis_check() -> None:
             ],
             env=env,
         )
+        run(
+            [
+                sys.executable,
+                "scripts/game_coach.py",
+                "--evidence-json",
+                str(analysis / "deterministic_analysis.json"),
+                "--game",
+                "latest",
+                "--output-md",
+                str(analysis / "game_coach_report.md"),
+                "--output-json",
+                str(analysis / "game_coach_report.json"),
+                "--prompt-out",
+                str(analysis / "game_coach_prompt.json"),
+                "--dry-run",
+            ],
+            env=env,
+        )
+        run(
+            [
+                sys.executable,
+                "scripts/deck_coach.py",
+                "--evidence-json",
+                str(analysis / "deterministic_analysis.json"),
+                "--last",
+                "10",
+                "--output-md",
+                str(analysis / "deck_coach_report.md"),
+                "--output-json",
+                str(analysis / "deck_coach_report.json"),
+                "--prompt-out",
+                str(analysis / "deck_coach_prompt.json"),
+                "--dry-run",
+            ],
+            env=env,
+        )
         expected = [
             "summary.json",
             "games.csv",
@@ -97,6 +133,12 @@ def sample_analysis_check() -> None:
             "deterministic_analysis.json",
             "coach_report.json",
             "coach_report.md",
+            "game_coach_report.json",
+            "game_coach_report.md",
+            "game_coach_prompt.json",
+            "deck_coach_report.json",
+            "deck_coach_report.md",
+            "deck_coach_prompt.json",
         ]
         missing = [name for name in expected if not (analysis / name).exists()]
         if missing:

@@ -28,6 +28,8 @@ Experiment awareness:
 
 - Use Waitress played count, Waitress attached energy count, Waitress whiff count, SSP Annihilape attack count, and SSP attack outcomes only if they support the experiment verdict.
 - Use each SSP attack row when judging SSP: attack used, target, prizes gained, opponent prizes gained, and positive/neutral/negative outcome.
+- Do not recommend cutting a card that passes its success criteria unless it clearly caused losses or blocked stronger plays.
+- If a card passes its success criteria but does not solve the biggest remaining problem, the verdict should be KEEP for now and the next experiment should target the remaining problem.
 
 Strength rule:
 
@@ -42,7 +44,7 @@ Put these five sections first and keep them short enough to read in under 30 sec
 4. Next Focus
 5. Confidence
 
-When the experiment is complete, `Verdict` must begin with exactly one of: KEEP, CUT, MODIFY, NEED MORE GAMES.
+When the experiment is complete, `Verdict` must begin with exactly one of: KEEP, KEEP FOR NOW, CUT, MODIFY, NEED MORE GAMES.
 
 Optional extra detail may include Biggest Positive, Biggest Mistake, Deck Issue, Play Issue, Matchup Issue, Card-Specific Observations, and Evidence Notes.
 
@@ -64,7 +66,7 @@ Also return a JSON summary with this shape:
   "card_observations": [
     {"card": "Waitress", "observation": "...", "evidence": ["Game 41"], "confidence": "high|medium|low"}
   ],
-  "experiment_verdict": "KEEP|CUT|MODIFY|NEED MORE GAMES",
+  "experiment_verdict": "KEEP|KEEP FOR NOW|CUT|MODIFY|NEED MORE GAMES",
   "next_experiment": "..."
 }
 ```

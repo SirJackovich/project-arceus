@@ -58,7 +58,7 @@ python3 scripts/post_game.py --verbose
 python3 scripts/post_game.py --last 15
 ```
 
-By default, `post_game.py` runs Game Coach for the newest match. Deck Coach runs when you pass `--deck-review` or when the active experiment tracker reaches its target game count.
+By default, `post_game.py` runs Game Coach for the newest match. Deck Coach runs when you pass `--deck-review` or when the saved game number ends in `0`, such as Game 50, 60, or 70.
 
 Run the project safety checks before committing:
 

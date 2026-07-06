@@ -2,6 +2,15 @@
 
 Each Codex change should add a new entry that says what changed, why it changed, and how to test it.
 
+## v0.8.1
+
+- What changed: Added Game Coach timing context so late first Annihilape is classified as setup failure, early attacker bought time, opponent conceded/was weak, or on-time instead of always being treated as bad.
+- What changed: Included Hawlucha in attack-decision evidence so Hawlucha prize turns can explain delayed Annihilape timing.
+- What changed: Changed automatic Deck Coach review cadence to saved game numbers ending in `0`, making Game 50 the SSP Annihilape + Waitress checkpoint.
+- What changed: Added `experiments/004-ssp-annihilape-waitress.md` for the current experiment.
+- Why: Game Coach needs to reflect the actual match context, and deck reviews should align with clean 10-game checkpoints.
+- How to test: Run `python3 scripts/check_project.py` and inspect `python3 scripts/game_coach.py --game latest --dry-run` for `annihilape_timing_context`.
+
 ## v0.8.0
 
 - What changed: Split AI coaching into `scripts/game_coach.py` for the current game and `scripts/deck_coach.py` for last-N-game deck review trends.

@@ -53,6 +53,13 @@ def rows_for_game(rows: list, game_id: str) -> list:
     return [row for row in rows if row.get("game_id") == game_id]
 
 
+def as_int(value) -> int:
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return 0
+
+
 def details_for_game(payload: dict, game_id: str) -> list:
     return [row for row in payload.get("details", []) if row.get("game_id") == game_id]
 
@@ -69,23 +76,74 @@ def experiment_for_game(metrics: dict, game_label: str, game_id: str) -> dict:
     }
 
 
+def annihilape_timing_context(selected: dict, attack_quality: list, attack_decisions: list,
+                              evolution_line: list, miss_reasons: list) -> dict:
+    first_attack = attack_quality[0] if attack_quality else {}
+    first_turn_raw = first_attack.get("first_attack_turn", "none")
+    first_turn = as_int(first_turn_raw)
+    is_late = first_turn_raw == "none" or first_turn > 4
+    early_attackers = [
+        row for row in attack_decisions
+        if row.get("attacker") in {"Hawlucha", "Primeape"}
+        and as_int(row.get("prize_value")) > 0
+        and (first_turn_raw == "none" or as_int(row.get("turn")) < first_turn)
+    ]
+    evolution_bottleneck = next((row.get("bottleneck", "") for row in evolution_line if row.get("bottleneck")), "")
+
+    if not is_late:
+        classification = "Annihilape was on time"
+        confidence = "high"
+        recommendation_hint = "Do not focus on first Annihilape timing for this game."
+    elif early_attackers:
+        classification = "early attacker successfully bought time"
+        confidence = "high"
+        recommendation_hint = "Do not treat late Annihilape as the main problem; review whether the early attacker prize plan created enough tempo."
+    elif selected.get("result") == "win":
+        classification = "late Annihilape because opponent conceded/was weak"
+        confidence = "medium" if "conceded" in selected.get("game_id", "") else "low"
+        recommendation_hint = "Do not over-correct Annihilape timing from this game; the win did not require the normal attacker curve."
+    elif miss_reasons or evolution_bottleneck:
+        classification = "late Annihilape because setup failed"
+        confidence = "medium"
+        recommendation_hint = "Focus next game on the specific setup bottleneck before blaming attack timing alone."
+    else:
+        classification = "late Annihilape for unknown reason"
+        confidence = "low"
+        recommendation_hint = "Keep the conclusion tentative because hidden hand/prize information may explain the delay."
+
+    return {
+        "first_annihilape_attack_turn": first_turn_raw,
+        "classification": classification,
+        "confidence": confidence,
+        "early_prize_attackers_before_annihilape": early_attackers,
+        "evolution_bottleneck": evolution_bottleneck,
+        "miss_reasons": miss_reasons,
+        "recommendation_hint": recommendation_hint,
+    }
+
+
 def compact_game_evidence(evidence: dict, selected: dict) -> dict:
     game_id = selected.get("game_id", "")
     game_label = selected.get("game", game_id)
     mulligan_rate = evidence.get("mulligan_rate", {})
+    attack_quality = rows_for_game(evidence.get("annihilape_attack_quality", []), game_id)
+    attack_decisions = rows_for_game(evidence.get("attack_decision_quality", []), game_id)
+    evolution_line = rows_for_game(evidence.get("evolution_line", {}).get("rows", []), game_id)
+    miss_reasons = details_for_game(evidence.get("annihilape_attack_miss_reasons", {}), game_id)
     return {
         "layer": evidence.get("layer", "deterministic_analyzer"),
         "scope": "single current game",
         "game": selected,
         "mulligan_warnings": rows_for_game(evidence.get("mulligan_warnings", []), game_id),
         "mulligan_rate_this_game": rows_for_game(mulligan_rate.get("mulligans_per_game", []), game_id),
-        "annihilape_attack_quality": rows_for_game(evidence.get("annihilape_attack_quality", []), game_id),
-        "attack_decision_quality": rows_for_game(evidence.get("attack_decision_quality", []), game_id),
+        "annihilape_attack_quality": attack_quality,
+        "attack_decision_quality": attack_decisions,
         "stadium_quality": rows_for_game(evidence.get("stadium_quality", []), game_id),
-        "evolution_line": rows_for_game(evidence.get("evolution_line", {}).get("rows", []), game_id),
+        "evolution_line": evolution_line,
         "line_rebuild": rows_for_game(evidence.get("line_rebuild", []), game_id),
         "backup_attacker": rows_for_game(evidence.get("backup_attacker", []), game_id),
-        "first_attack_miss_reasons": details_for_game(evidence.get("annihilape_attack_miss_reasons", {}), game_id),
+        "first_attack_miss_reasons": miss_reasons,
+        "annihilape_timing_context": annihilape_timing_context(selected, attack_quality, attack_decisions, evolution_line, miss_reasons),
         "experiment_signals_this_game": experiment_for_game(evidence.get("experiment_metrics", {}), game_label, game_id),
     }
 

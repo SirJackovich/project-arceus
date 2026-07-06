@@ -11,9 +11,6 @@ from pathlib import Path
 
 ANALYSIS_DIR = Path("data/analysis")
 MANIFEST = Path("data/manifest.csv")
-EXPERIMENT_STATE = Path("data/experiment_tracker.json")
-
-
 def run_step(command, verbose=False, allow_failure=False):
     if verbose:
         print(f"\n$ {' '.join(command)}")
@@ -55,6 +52,12 @@ def game_number_from_id(game_id):
     return str(int(digits)) if digits else "?"
 
 
+def latest_game_number():
+    row = latest_manifest_row()
+    number = game_number_from_id(row.get("game_id", "")) if row else "?"
+    return int(number) if str(number).isdigit() else 0
+
+
 def record_line():
     summary = read_json(ANALYSIS_DIR / "deterministic_analysis.json").get("summary", {})
     return f"Last 10: {summary.get('wins', 0)}-{summary.get('losses', 0)}"
@@ -76,17 +79,9 @@ def print_saved_summary():
     print(f"Saved Game {game_number_from_id(row.get('game_id', ''))}: {row.get('result', 'unknown')} vs {row.get('opponent', 'unknown') or 'unknown'}")
 
 
-def experiment_review_due():
-    state = read_json(EXPERIMENT_STATE)
-    experiment = state.get("current_experiment") if isinstance(state, dict) else None
-    if not experiment or experiment.get("status") not in {"active", ""}:
-        return False
-    try:
-        target = int(experiment.get("target_games") or 10)
-    except (TypeError, ValueError):
-        target = 10
-    games = experiment.get("games") or []
-    return len(games) >= target
+def deck_review_due():
+    number = latest_game_number()
+    return bool(number and number % 10 == 0)
 
 
 def main():
@@ -128,7 +123,7 @@ def main():
         game_command.append("--verbose")
     result = run_step(game_command, verbose=args.verbose, allow_failure=True)
     if args.verbose:
-        if args.deck_review or experiment_review_due():
+        if args.deck_review or deck_review_due():
             deck_command = [sys.executable, "scripts/deck_coach.py", "--last", str(args.last), "--verbose"]
             if args.ai_dry_run:
                 deck_command.append("--dry-run")
@@ -140,7 +135,7 @@ def main():
     if result.returncode:
         print("Game Coach unavailable. Deterministic evidence was still generated.")
 
-    if args.deck_review or experiment_review_due():
+    if args.deck_review or deck_review_due():
         deck_command = [sys.executable, "scripts/deck_coach.py", "--last", str(args.last)]
         if args.ai_dry_run:
             deck_command.append("--dry-run")

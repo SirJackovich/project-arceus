@@ -459,7 +459,7 @@ def attack_decision_quality(events, selected_games):
             event for event in game_events
             if event.get("event_player") == MY_PLAYER
             and event.get("event_type") == "attack"
-            and event.get("card_name") in {"Annihilape", "Primeape"}
+            and event.get("card_name") in {"Annihilape", "Primeape", "Hawlucha"}
         ]
         for attack in attacks:
             details = related_effect_details(game_events, attack)

@@ -11,6 +11,17 @@ Focus on:
 - Whether the current experiment cards mattered in this game.
 - One next-game focus based on this game only.
 
+Annihilape timing rule:
+
+- Do not always treat a late first Annihilape attack as bad.
+- Use `annihilape_timing_context.classification` before making any claim about Annihilape timing.
+- If Hawlucha or Primeape took prizes before Annihilape attacked, describe it as "early attacker successfully bought time", not "late Annihilape problem".
+- Distinguish these cases clearly:
+  - late Annihilape because setup failed
+  - late Annihilape because another attacker was successfully taking prizes
+  - late Annihilape because opponent conceded/was weak
+- Next Focus must reflect the actual context. Do not recommend fixing Annihilape timing when the evidence says another attacker bought time or the win did not require Annihilape.
+
 Attack decision rule:
 
 - Do not recommend "waiting to attack for 280" as the default.

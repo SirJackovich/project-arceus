@@ -18,6 +18,7 @@ from src.ai_coaching import (
     read_json,
     run_llm_report,
 )
+from src.experiment_memory import read_current
 
 
 def game_number(game_id: str) -> int:
@@ -76,6 +77,91 @@ def experiment_for_game(metrics: dict, game_label: str, game_id: str) -> dict:
     }
 
 
+def turn_summary(attack_decisions: list, stadium_rows: list, evolution_rows: list) -> list[dict]:
+    rows = []
+    for row in attack_decisions:
+        rows.append({
+            "turn": row.get("turn", "unknown"),
+            "event": "attack",
+            "summary": (
+                f"{row.get('attacker', '')} used {row.get('attack', '')} into {row.get('target', '')}; "
+                f"damage {row.get('damage', 0)}, prizes {row.get('prize_value', 0)}"
+            ).strip(),
+            "evidence": row.get("evidence", ""),
+        })
+    for row in stadium_rows:
+        rows.append({
+            "turn": row.get("risky_ruins_played_by_turn", "unknown"),
+            "event": "stadium",
+            "summary": f"Risky Ruins timing: {row.get('risky_ruins_played_by_turn', 'none')}",
+            "evidence": "stadium_quality",
+        })
+    for row in evolution_rows:
+        rows.append({
+            "turn": row.get("first_complete_line_turn", row.get("completed_turn", "unknown")),
+            "event": "evolution_line",
+            "summary": f"Evolution bottleneck: {row.get('bottleneck', 'none')}",
+            "evidence": "evolution_line",
+        })
+    return sorted(rows, key=lambda row: as_int(row.get("turn")))[:12]
+
+
+def prize_swing_events(attack_decisions: list) -> list[dict]:
+    return [
+        row for row in attack_decisions
+        if as_int(row.get("prize_value")) > 0 or row.get("opponent_immediately_ko_attacker") == "yes"
+    ]
+
+
+def key_turning_point(timing_context: dict, attack_decisions: list, selected: dict) -> dict:
+    prize_events = prize_swing_events(attack_decisions)
+    if timing_context.get("early_prize_attackers_before_annihilape"):
+        first = timing_context["early_prize_attackers_before_annihilape"][0]
+        return {
+            "type": "early_attacker_prize_pressure",
+            "summary": f"{first.get('attacker')} started the prize plan before Annihilape was online.",
+            "evidence": first.get("evidence", ""),
+        }
+    if prize_events:
+        first = prize_events[0]
+        return {
+            "type": "prize_swing",
+            "summary": f"{first.get('attacker')} prize swing on Turn {first.get('turn')}: {first.get('prize_value')} prize(s).",
+            "evidence": first.get("evidence", ""),
+        }
+    return {
+        "type": "result_context",
+        "summary": f"Game result: {selected.get('result', 'unknown')} vs {selected.get('opponent', 'unknown')}",
+        "evidence": selected.get("game_id", ""),
+    }
+
+
+def why_win_loss_candidates(selected: dict, timing_context: dict, attack_decisions: list,
+                            backup_rows: list, experiment_signals: dict) -> list[dict]:
+    candidates = []
+    result = selected.get("result", "unknown")
+    if timing_context.get("classification"):
+        candidates.append({
+            "candidate": timing_context["classification"],
+            "supports_result": "yes" if result == "win" and "successfully bought time" in timing_context["classification"] else "unknown",
+            "confidence": timing_context.get("confidence", "low"),
+        })
+    prize_total = sum(as_int(row.get("prize_value")) for row in attack_decisions)
+    if prize_total:
+        candidates.append({
+            "candidate": f"visible attacks took {prize_total} prize(s)",
+            "supports_result": "yes" if result == "win" else "mixed",
+            "confidence": "high",
+        })
+    for row in backup_rows:
+        state = row.get("state", "")
+        if state and state != "not tested":
+            candidates.append({"candidate": f"backup attacker state: {state}", "supports_result": "mixed", "confidence": "medium"})
+    if experiment_signals.get("waitress_events_this_game") or experiment_signals.get("ssp_attacks_this_game"):
+        candidates.append({"candidate": "experiment cards appeared in this game", "supports_result": "unknown", "confidence": "medium"})
+    return candidates[:6]
+
+
 def annihilape_timing_context(selected: dict, attack_quality: list, attack_decisions: list,
                               evolution_line: list, miss_reasons: list) -> dict:
     first_attack = attack_quality[0] if attack_quality else {}
@@ -128,8 +214,12 @@ def compact_game_evidence(evidence: dict, selected: dict) -> dict:
     mulligan_rate = evidence.get("mulligan_rate", {})
     attack_quality = rows_for_game(evidence.get("annihilape_attack_quality", []), game_id)
     attack_decisions = rows_for_game(evidence.get("attack_decision_quality", []), game_id)
+    stadium_rows = rows_for_game(evidence.get("stadium_quality", []), game_id)
     evolution_line = rows_for_game(evidence.get("evolution_line", {}).get("rows", []), game_id)
     miss_reasons = details_for_game(evidence.get("annihilape_attack_miss_reasons", {}), game_id)
+    backup_rows = rows_for_game(evidence.get("backup_attacker", []), game_id)
+    experiment_signals = experiment_for_game(evidence.get("experiment_metrics", {}), game_label, game_id)
+    timing_context = annihilape_timing_context(selected, attack_quality, attack_decisions, evolution_line, miss_reasons)
     return {
         "layer": evidence.get("layer", "deterministic_analyzer"),
         "scope": "single current game",
@@ -138,13 +228,17 @@ def compact_game_evidence(evidence: dict, selected: dict) -> dict:
         "mulligan_rate_this_game": rows_for_game(mulligan_rate.get("mulligans_per_game", []), game_id),
         "annihilape_attack_quality": attack_quality,
         "attack_decision_quality": attack_decisions,
-        "stadium_quality": rows_for_game(evidence.get("stadium_quality", []), game_id),
+        "turn_summary": turn_summary(attack_decisions, stadium_rows, evolution_line),
+        "key_turning_point": key_turning_point(timing_context, attack_decisions, selected),
+        "prize_swing_events": prize_swing_events(attack_decisions),
+        "stadium_quality": stadium_rows,
         "evolution_line": evolution_line,
         "line_rebuild": rows_for_game(evidence.get("line_rebuild", []), game_id),
-        "backup_attacker": rows_for_game(evidence.get("backup_attacker", []), game_id),
+        "backup_attacker": backup_rows,
         "first_attack_miss_reasons": miss_reasons,
-        "annihilape_timing_context": annihilape_timing_context(selected, attack_quality, attack_decisions, evolution_line, miss_reasons),
-        "experiment_signals_this_game": experiment_for_game(evidence.get("experiment_metrics", {}), game_label, game_id),
+        "annihilape_timing_context": timing_context,
+        "experiment_signals_this_game": experiment_signals,
+        "why_win_loss_candidates": why_win_loss_candidates(selected, timing_context, attack_decisions, backup_rows, experiment_signals),
     }
 
 
@@ -153,7 +247,7 @@ def build_context(args: argparse.Namespace) -> dict:
     if not evidence:
         raise SystemExit(f"Missing deterministic evidence JSON: {args.evidence_json}")
     deck = read_json(args.deck, {})
-    experiment = read_json(args.experiment_state, DEFAULT_EXPERIMENT) or DEFAULT_EXPERIMENT
+    experiment = read_current(args.experiment_state)
     selected = select_game(evidence, args.game)
     return {
         "generated_at": generated_at(),
@@ -169,7 +263,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate the AI-written Project Arceus game coach report.")
     parser.add_argument("--evidence-json", default="data/analysis/deterministic_analysis.json")
     parser.add_argument("--deck", default="decks/annihilape/v01.json")
-    parser.add_argument("--experiment-state", default="data/experiment_tracker.json")
+    parser.add_argument("--experiment-state", default="data/experiments/current.json")
     parser.add_argument("--prompt", default="prompts/game_coach.md")
     parser.add_argument("--game", default="latest", help="Game number, game_id, or latest.")
     parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL", DEFAULT_MODEL))

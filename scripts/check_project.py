@@ -2,6 +2,7 @@
 """Run Project Arceus safety checks before committing changes."""
 
 import argparse
+import json
 import os
 import py_compile
 import shutil
@@ -64,6 +65,24 @@ def sample_analysis_check() -> None:
     print("\nSample log analysis")
     with tempfile.TemporaryDirectory(prefix="project-arceus-check-") as tmp:
         analysis = Path(tmp) / "analysis"
+        experiment_state = Path(tmp) / "current_experiment.json"
+        experiment_state.write_text(json.dumps({
+            "id": "test",
+            "name": "Fixture experiment",
+            "deck_changes": ["fixture cards"],
+            "hypothesis": "Fixture checks should exercise current experiment scoping.",
+            "success_criteria": ["sample pipeline runs"],
+            "start_game": 1,
+            "games_target": 4,
+            "target_games": 4,
+            "cards_being_tested": ["Waitress", "Annihilape SSP 100"],
+            "games_completed": 4,
+            "games": [],
+            "completed": True,
+            "status": "completed",
+            "final_verdict": "",
+            "next_experiment": "",
+        }, indent=2) + "\n", encoding="utf-8")
         env = os.environ.copy()
         env.setdefault("PYTHONPYCACHEPREFIX", str(Path(tmp) / "pycache"))
         run([sys.executable, "scripts/analyze_logs.py", "--input-dir", str(FIXTURES), "--output-dir", str(analysis)], env=env)
@@ -100,6 +119,8 @@ def sample_analysis_check() -> None:
                 str(analysis / "game_coach_report.json"),
                 "--prompt-out",
                 str(analysis / "game_coach_prompt.json"),
+                "--experiment-state",
+                str(experiment_state),
                 "--dry-run",
             ],
             env=env,
@@ -110,6 +131,10 @@ def sample_analysis_check() -> None:
                 "scripts/deck_coach.py",
                 "--evidence-json",
                 str(analysis / "deterministic_analysis.json"),
+                "--experiment",
+                "current",
+                "--experiment-state",
+                str(experiment_state),
                 "--last",
                 "10",
                 "--output-md",

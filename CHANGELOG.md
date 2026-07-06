@@ -2,6 +2,15 @@
 
 Each Codex change should add a new entry that says what changed, why it changed, and how to test it.
 
+## v0.8.2
+
+- What changed: Added `data/experiments/current.json` experiment memory with name, deck changes, hypothesis, success criteria, start game, target games, tested cards, progress, completed status, and final verdict fields.
+- What changed: Updated `scripts/post_game.py` to sync experiment progress after every imported game and run Deck Coach only when the active experiment is complete or `--deck-review` is passed.
+- What changed: Updated `scripts/deck_coach.py --experiment current` so Deck Coach scopes evidence to active experiment games instead of generic last-10 trends.
+- What changed: Added richer Game Coach context for turn summary, key turning point, experiment card events, prize swings, and win/loss candidates.
+- Why: Game Coach should remain current-game focused, while Deck Coach should make decisions only from the active experiment window.
+- How to test: Run `python3 scripts/check_project.py`, then inspect `data/experiments/current.json` and run `python3 scripts/deck_coach.py --experiment current --dry-run`.
+
 ## v0.8.1
 
 - What changed: Added Game Coach timing context so late first Annihilape is classified as setup failure, early attacker bought time, opponent conceded/was weak, or on-time instead of always being treated as bad.

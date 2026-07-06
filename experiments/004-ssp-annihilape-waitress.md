@@ -7,8 +7,9 @@ Do 1 Annihilape SSP 100 and 2 Waitress ASC 215 improve rebuilds, tempo, or awkwa
 ## Test Window
 
 - Current checkpoint: Game 50
-- Review cadence: every game number ending in `0`
-- Review command: `python3 scripts/post_game.py --deck-review` or let `post_game.py` trigger Deck Coach automatically on Game 50, 60, 70, etc.
+- Active memory: `data/experiments/current.json`
+- Target: 10 games
+- Review command: `python3 scripts/post_game.py --deck-review` or let `post_game.py` trigger Deck Coach automatically when the active experiment reaches 10/10 games.
 
 ## Evidence To Watch
 

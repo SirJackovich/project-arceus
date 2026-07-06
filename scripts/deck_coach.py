@@ -18,27 +18,99 @@ from src.ai_coaching import (
     read_json,
     run_llm_report,
 )
+from src.experiment_memory import game_label, game_number, is_completed, read_current, rows_in_experiment
 
 
-def compact_evidence(evidence: dict, last: int) -> dict:
-    recent_games = evidence.get("games", [])[-last:]
+def summarize_games(games: list[dict]) -> dict:
+    wins = sum(1 for game in games if game.get("result") == "win")
+    losses = sum(1 for game in games if game.get("result") == "loss")
+    return {
+        "games": len(games),
+        "wins": wins,
+        "losses": losses,
+        "win_rate": round((wins / (wins + losses)) * 100) if wins + losses else 0,
+    }
+
+
+def filter_by_game_id(rows: list, selected_ids: set[str]) -> list:
+    return [row for row in rows if row.get("game_id") in selected_ids]
+
+
+def filter_by_game_label(rows: list, selected_labels: set[str]) -> list:
+    return [row for row in rows if row.get("game") in selected_labels]
+
+
+def compact_evolution_line(evolution_line: dict, selected_ids: set[str]) -> dict:
+    rows = filter_by_game_id(evolution_line.get("rows", []), selected_ids)
+    bottlenecks = {}
+    hand_gaps = {}
+    for row in rows:
+        bottleneck = row.get("bottleneck", "")
+        if bottleneck:
+            bottlenecks[bottleneck] = bottlenecks.get(bottleneck, 0) + 1
+        for gap in row.get("hand_gaps", []) if isinstance(row.get("hand_gaps"), list) else []:
+            hand_gaps[gap] = hand_gaps.get(gap, 0) + 1
+    return {"rows": rows, "bottlenecks": bottlenecks, "hand_gaps": hand_gaps}
+
+
+def compact_experiment_metrics(metrics: dict, selected_labels: set[str], experiment: dict) -> dict:
+    evidence_rows = filter_by_game_label(metrics.get("evidence", []), selected_labels)
+    ssp_attacks = filter_by_game_label(metrics.get("ssp_attacks", []), selected_labels)
+    waitress_rows = [row for row in evidence_rows if row.get("card") == "Waitress"]
+    waitress_attached = sum(1 for row in waitress_rows if row.get("result") == "attached energy")
+    waitress_whiff = sum(1 for row in waitress_rows if row.get("result") == "whiff/no visible attach")
+    ssp_wins = sum(1 for row in ssp_attacks if row.get("outcome") == "positive")
+    ssp_losses = sum(1 for row in ssp_attacks if row.get("outcome") == "negative")
+    return {
+        "current_experiment": experiment,
+        "waitress_played_count": len(waitress_rows),
+        "waitress_attached_energy_count": waitress_attached,
+        "waitress_whiff_count": waitress_whiff,
+        "waitress_games": sorted({row.get("game") for row in waitress_rows if row.get("game")}),
+        "ssp_annihilape_attack_count": len(ssp_attacks),
+        "ssp_annihilape_games": sorted({row.get("game") for row in ssp_attacks if row.get("game")}),
+        "ssp_attacks": ssp_attacks,
+        "ssp_outcome": {
+            "positive_attacks": ssp_wins,
+            "negative_attacks": ssp_losses,
+            "neutral_attacks": sum(1 for row in ssp_attacks if row.get("outcome") == "neutral"),
+            "classification": "neutral" if ssp_wins == ssp_losses else "won" if ssp_wins > ssp_losses else "lost",
+            "inference_note": metrics.get("ssp_outcome", {}).get("inference_note", ""),
+        },
+        "evidence": evidence_rows,
+    }
+
+
+def selected_experiment_games(evidence: dict, args: argparse.Namespace, experiment: dict) -> list[dict]:
+    games = evidence.get("games", [])
+    if args.experiment == "current":
+        return rows_in_experiment(games, experiment)
+    return sorted(games, key=lambda row: game_number(row.get("game_id", "")))[-args.last:]
+
+
+def compact_evidence(evidence: dict, args: argparse.Namespace, experiment: dict) -> dict:
+    recent_games = selected_experiment_games(evidence, args, experiment)
+    selected_ids = {game.get("game_id", "") for game in recent_games}
+    selected_labels = {game.get("game") or game_label(game.get("game_id", "")) for game in recent_games}
     return {
         "layer": evidence.get("layer", "deterministic_analyzer"),
-        "scope": evidence.get("scope", ""),
-        "summary": evidence.get("summary", {}),
+        "scope": "active experiment games" if args.experiment == "current" else evidence.get("scope", ""),
+        "experiment_completed": is_completed(experiment),
+        "summary": summarize_games(recent_games),
         "recent_games": recent_games,
+        "selected_game_ids": sorted(selected_ids, key=game_number),
         "success_conditions": evidence.get("success_conditions", []),
-        "mulligan_warnings": evidence.get("mulligan_warnings", []),
+        "mulligan_warnings": filter_by_game_id(evidence.get("mulligan_warnings", []), selected_ids),
         "mulligan_rate": evidence.get("mulligan_rate", {}),
         "card_tracking": evidence.get("card_tracking", [])[:15],
-        "annihilape_attack_quality": evidence.get("annihilape_attack_quality", [])[-last:],
-        "attack_decision_quality": evidence.get("attack_decision_quality", [])[-30:],
-        "stadium_quality": evidence.get("stadium_quality", [])[-last:],
-        "evolution_line": evidence.get("evolution_line", {}),
-        "line_rebuild": evidence.get("line_rebuild", [])[-last:],
-        "backup_attacker": evidence.get("backup_attacker", [])[-last:],
+        "annihilape_attack_quality": filter_by_game_id(evidence.get("annihilape_attack_quality", []), selected_ids),
+        "attack_decision_quality": filter_by_game_id(evidence.get("attack_decision_quality", []), selected_ids),
+        "stadium_quality": filter_by_game_id(evidence.get("stadium_quality", []), selected_ids),
+        "evolution_line": compact_evolution_line(evidence.get("evolution_line", {}), selected_ids),
+        "line_rebuild": filter_by_game_id(evidence.get("line_rebuild", []), selected_ids),
+        "backup_attacker": filter_by_game_id(evidence.get("backup_attacker", []), selected_ids),
         "possible_loss_factors": evidence.get("possible_loss_factors", []),
-        "experiment_metrics": evidence.get("experiment_metrics", {}),
+        "experiment_metrics": compact_experiment_metrics(evidence.get("experiment_metrics", {}), selected_labels, experiment),
         "candidate_strengths": evidence.get("candidate_strengths", []),
         "legacy_first_attack_miss_reasons": evidence.get("annihilape_attack_miss_reasons", {}),
     }
@@ -49,14 +121,14 @@ def build_context(args: argparse.Namespace) -> dict:
     if not evidence:
         raise SystemExit(f"Missing deterministic evidence JSON: {args.evidence_json}")
     deck = read_json(args.deck, {})
-    experiment = read_json(args.experiment_state, DEFAULT_EXPERIMENT) or DEFAULT_EXPERIMENT
+    experiment = read_current(args.experiment_state) if args.experiment == "current" else read_json(args.experiment_state, DEFAULT_EXPERIMENT) or DEFAULT_EXPERIMENT
     return {
         "generated_at": generated_at(),
         "coach_type": "deck_coach",
-        "instructions": "Use deterministic evidence only. Analyze last-N trends, deck construction, and experiment results.",
+        "instructions": "Use deterministic evidence only. Analyze active experiment games, deck construction, and experiment results.",
         "deck": compact_deck(deck),
         "current_experiment": experiment,
-        "deterministic_evidence": compact_evidence(evidence, args.last),
+        "deterministic_evidence": compact_evidence(evidence, args, experiment),
     }
 
 
@@ -64,7 +136,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate the AI-written Project Arceus deck coach report.")
     parser.add_argument("--evidence-json", default="data/analysis/deterministic_analysis.json")
     parser.add_argument("--deck", default="decks/annihilape/v01.json")
-    parser.add_argument("--experiment-state", default="data/experiment_tracker.json")
+    parser.add_argument("--experiment-state", default="data/experiments/current.json")
+    parser.add_argument("--experiment", choices=["current", "last"], default="last", help="Use current experiment games or generic last-N scope.")
     parser.add_argument("--prompt", default="prompts/deck_coach.md")
     parser.add_argument("--last", type=int, default=10)
     parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL", DEFAULT_MODEL))

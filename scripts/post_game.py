@@ -8,9 +8,18 @@ import subprocess
 import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.experiment_memory import is_completed, progress_line, sync_current_from_manifest
+
 
 ANALYSIS_DIR = Path("data/analysis")
 MANIFEST = Path("data/manifest.csv")
+CURRENT_EXPERIMENT = Path("data/experiments/current.json")
+
+
 def run_step(command, verbose=False, allow_failure=False):
     if verbose:
         print(f"\n$ {' '.join(command)}")
@@ -79,11 +88,6 @@ def print_saved_summary():
     print(f"Saved Game {game_number_from_id(row.get('game_id', ''))}: {row.get('result', 'unknown')} vs {row.get('opponent', 'unknown') or 'unknown'}")
 
 
-def deck_review_due():
-    number = latest_game_number()
-    return bool(number and number % 10 == 0)
-
-
 def main():
     parser = argparse.ArgumentParser(description="Import a battle log and run the normal Project Arceus post-game workflow.")
     parser.add_argument("--last", type=int, default=10, help="Number of recent games for the AI coach report.")
@@ -104,10 +108,13 @@ def main():
     if args.verbose:
         coach_command.append("--verbose")
     run_step(coach_command, verbose=args.verbose)
+    experiment = sync_current_from_manifest(str(CURRENT_EXPERIMENT), str(MANIFEST))
+    deck_review_due = is_completed(experiment)
 
     if not args.verbose:
         print_saved_summary()
         print(record_line())
+        print(progress_line(experiment))
 
     if args.no_ai:
         if args.verbose:
@@ -123,8 +130,8 @@ def main():
         game_command.append("--verbose")
     result = run_step(game_command, verbose=args.verbose, allow_failure=True)
     if args.verbose:
-        if args.deck_review or deck_review_due():
-            deck_command = [sys.executable, "scripts/deck_coach.py", "--last", str(args.last), "--verbose"]
+        if args.deck_review or deck_review_due:
+            deck_command = [sys.executable, "scripts/deck_coach.py", "--experiment", "current", "--last", str(args.last), "--verbose"]
             if args.ai_dry_run:
                 deck_command.append("--dry-run")
             run_step(deck_command, verbose=True, allow_failure=True)
@@ -135,8 +142,8 @@ def main():
     if result.returncode:
         print("Game Coach unavailable. Deterministic evidence was still generated.")
 
-    if args.deck_review or deck_review_due():
-        deck_command = [sys.executable, "scripts/deck_coach.py", "--last", str(args.last)]
+    if args.deck_review or deck_review_due:
+        deck_command = [sys.executable, "scripts/deck_coach.py", "--experiment", "current", "--last", str(args.last)]
         if args.ai_dry_run:
             deck_command.append("--dry-run")
         deck_result = run_step(deck_command, verbose=False, allow_failure=True)

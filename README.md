@@ -18,7 +18,7 @@ Project Arceus uses a two-layer coaching system:
 - Tracks game results, opening choices, card usage, attacks, prize events, and success-condition checks.
 - Writes deterministic evidence for AI coaching, including mulligans, card flow, Annihilape attack quality, Risky Ruins timing, evolution bottlenecks, backup attacker state, possible loss factors, and confidence notes.
 - Generates optional AI-written Game Coach and Deck Coach reports from deterministic evidence instead of raw logs.
-- Tracks the current deck experiment in `data/experiment_tracker.json`.
+- Tracks the current deck experiment in `data/experiments/current.json`.
 - Stores the current Annihilape deck as `decks/annihilape/v01.json` and `v01.md`.
 - Stores fetched card details in `decks/annihilape/card_details.json` and `card_details.md`.
 - Provides reusable prompt templates for summaries, coaching, and deck recommendations.
@@ -58,7 +58,7 @@ python3 scripts/post_game.py --verbose
 python3 scripts/post_game.py --last 15
 ```
 
-By default, `post_game.py` runs Game Coach for the newest match. Deck Coach runs when you pass `--deck-review` or when the saved game number ends in `0`, such as Game 50, 60, or 70.
+By default, `post_game.py` runs Game Coach for the newest match and updates experiment progress. Deck Coach runs when you pass `--deck-review` or when `data/experiments/current.json` reaches its target game count.
 
 Run the project safety checks before committing:
 
@@ -181,6 +181,12 @@ python3 scripts/experiment_tracker.py record \
   --evidence-for "found Annihilape on time" \
   --evidence-against "no early Risky Ruins"
 ```
+
+The active post-game experiment memory lives at:
+
+- `data/experiments/current.json`
+
+It tracks the experiment name, deck changes, hypothesis, success criteria, start game, target games, tested cards, completed status, and final verdict.
 
 Generate a single-game summary for the newest match:
 

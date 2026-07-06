@@ -11,6 +11,14 @@ Focus on:
 - Whether the current experiment cards mattered in this game.
 - One next-game focus based on this game only.
 
+Use the richer single-game context:
+
+- `turn_summary` for the compact flow of the game.
+- `key_turning_point` for the most likely pivot.
+- `experiment_signals_this_game` for experiment card events.
+- `prize_swing_events` for prize-race claims.
+- `why_win_loss_candidates` for possible explanations of the result.
+
 Annihilape timing rule:
 
 - Do not always treat a late first Annihilape attack as bad.
@@ -32,6 +40,7 @@ Evidence rules:
 
 - Do not invent hidden-hand conclusions.
 - Do not criticize a card or play without citing current-game evidence.
+- Do not use last-10 trend advice in Game Coach.
 - If no clear play mistake is supported by evidence, say "None detected".
 - Separate deck issue, play issue, and matchup issue if evidence supports that split.
 

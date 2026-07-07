@@ -135,6 +135,8 @@ def sample_analysis_check() -> None:
                 "current",
                 "--experiment-state",
                 str(experiment_state),
+                "--card-db",
+                str(FIXTURES / "standard_cards.json"),
                 "--last",
                 "10",
                 "--output-md",
@@ -144,6 +146,19 @@ def sample_analysis_check() -> None:
                 "--prompt-out",
                 str(analysis / "deck_coach_prompt.json"),
                 "--dry-run",
+            ],
+            env=env,
+        )
+        run(
+            [
+                sys.executable,
+                "scripts/recommend_cards.py",
+                "--evidence-json",
+                str(analysis / "deterministic_analysis.json"),
+                "--card-db",
+                str(FIXTURES / "standard_cards.json"),
+                "--output-json",
+                str(analysis / "card_recommendations.json"),
             ],
             env=env,
         )
@@ -164,6 +179,7 @@ def sample_analysis_check() -> None:
             "deck_coach_report.json",
             "deck_coach_report.md",
             "deck_coach_prompt.json",
+            "card_recommendations.json",
         ]
         missing = [name for name in expected if not (analysis / name).exists()]
         if missing:

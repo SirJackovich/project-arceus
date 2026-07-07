@@ -2,6 +2,22 @@
 
 Each Codex change should add a new entry that says what changed, why it changed, and how to test it.
 
+## v0.9.1
+
+- What changed: Deck Coach terminal output now includes the exact next experiment card change when the LLM returns one.
+- What changed: Added formatting for structured `next_experiment` JSON so Remove/Add/Hypothesis/Success Criteria/Confidence are readable in the short report.
+- Why: The full report had the recommendation, but the terminal summary hid the card change.
+- How to test: Run `python3 scripts/deck_coach.py --experiment current --dry-run` and `python3 scripts/check_project.py`.
+
+## v0.9.0
+
+- What changed: Added a local Standard card database importer with `scripts/build_standard_card_db.py` for H/I/J regulation-mark cards.
+- What changed: Added deterministic card recommendation search with `src/card_recommender.py` and `scripts/recommend_cards.py`.
+- What changed: Deck Coach now receives up to 5 Standard-legal candidate cards, suggested small cuts, and the detected top deck problem.
+- What changed: Updated Deck Coach prompt to rank candidates by problem solved, Annihilape/Risky Ruins fit, slot cost, downside, legality, and engine conflict, then recommend exactly one 1-2 card experiment or no change.
+- Why: Deck experiments should be proposed by Project Arceus from Standard card text and match evidence, not manually invented each time.
+- How to test: Run `python3 scripts/check_project.py`, `python3 scripts/recommend_cards.py`, and `python3 scripts/deck_coach.py --experiment current --dry-run`.
+
 ## v0.8.3
 
 - What changed: Updated Deck Coach rules so passing experiment cards are not cut unless they clearly caused losses or blocked stronger plays.

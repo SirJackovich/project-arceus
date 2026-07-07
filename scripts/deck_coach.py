@@ -18,6 +18,7 @@ from src.ai_coaching import (
     read_json,
     run_llm_report,
 )
+from src.card_recommender import load_card_database, search_candidates
 from src.experiment_memory import game_label, game_number, is_completed, read_current, rows_in_experiment
 
 
@@ -122,13 +123,22 @@ def build_context(args: argparse.Namespace) -> dict:
         raise SystemExit(f"Missing deterministic evidence JSON: {args.evidence_json}")
     deck = read_json(args.deck, {})
     experiment = read_current(args.experiment_state) if args.experiment == "current" else read_json(args.experiment_state, DEFAULT_EXPERIMENT) or DEFAULT_EXPERIMENT
+    scoped_evidence = compact_evidence(evidence, args, experiment)
+    if Path(args.card_db).exists():
+        scoped_evidence["card_recommendations"] = search_candidates(scoped_evidence, deck, load_card_database(args.card_db), args.max_candidates)
+    else:
+        scoped_evidence["card_recommendations"] = {
+            "status": "missing_card_database",
+            "message": f"Build the local Standard database with `python3 scripts/build_standard_card_db.py --output {args.card_db}`.",
+            "candidates": [],
+        }
     return {
         "generated_at": generated_at(),
         "coach_type": "deck_coach",
         "instructions": "Use deterministic evidence only. Analyze active experiment games, deck construction, and experiment results.",
         "deck": compact_deck(deck),
         "current_experiment": experiment,
-        "deterministic_evidence": compact_evidence(evidence, args, experiment),
+        "deterministic_evidence": scoped_evidence,
     }
 
 
@@ -138,6 +148,8 @@ def main() -> int:
     parser.add_argument("--deck", default="decks/annihilape/v01.json")
     parser.add_argument("--experiment-state", default="data/experiments/current.json")
     parser.add_argument("--experiment", choices=["current", "last"], default="last", help="Use current experiment games or generic last-N scope.")
+    parser.add_argument("--card-db", default="data/cards/standard_cards.json", help="Local Standard card database JSON.")
+    parser.add_argument("--max-candidates", type=int, default=5)
     parser.add_argument("--prompt", default="prompts/deck_coach.md")
     parser.add_argument("--last", type=int, default=10)
     parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL", DEFAULT_MODEL))
@@ -155,6 +167,7 @@ def main() -> int:
         ("Why", "why"),
         ("Experiment Status", "experiment_status"),
         ("Next Focus", "next_focus"),
+        ("Next Experiment", "next_experiment"),
         ("Confidence", "confidence"),
     ]
     return run_llm_report(args, prompt, context, "Deck Coach", labels)

@@ -109,11 +109,41 @@ def extract_json_summary(text: str) -> dict:
     return {"parse_status": "missing_json_summary"}
 
 
+def format_terminal_value(value: Any) -> str:
+    if isinstance(value, dict) and {"remove", "add"} & set(value):
+        lines = []
+        removes = value.get("remove") or []
+        adds = value.get("add") or []
+        if removes:
+            lines.append("Remove:")
+            for row in removes:
+                lines.append(f"- {row.get('count', 1)} {row.get('card', '')}".rstrip())
+        if adds:
+            if lines:
+                lines.append("")
+            lines.append("Add:")
+            for row in adds:
+                lines.append(f"- {row.get('count', 1)} {row.get('card', '')}".rstrip())
+        if value.get("hypothesis"):
+            lines.extend(["", "Hypothesis:", str(value["hypothesis"])])
+        criteria = value.get("success_criteria") or []
+        if criteria:
+            lines.extend(["", "Success Criteria:"])
+            for criterion in criteria:
+                lines.append(f"- {criterion}")
+        if value.get("confidence"):
+            lines.extend(["", "Confidence:", str(value["confidence"])])
+        return "\n".join(lines).strip()
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False, indent=2)
+    return str(value).strip()
+
+
 def terminal_report(markdown: str, summary: dict, title: str, labels: list) -> str:
     if summary and "verdict" in summary:
         lines = [title, ""]
         for heading, key in labels:
-            value = str(summary.get(key, "")).strip() or "Not provided"
+            value = format_terminal_value(summary.get(key, "")) or "Not provided"
             lines.extend([f"## {heading}", value, ""])
         return "\n".join(lines).rstrip() + "\n"
 

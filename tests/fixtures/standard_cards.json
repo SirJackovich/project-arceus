@@ -1,0 +1,71 @@
+{
+  "source": "fixture",
+  "standard_regulation_marks": ["H", "I", "J"],
+  "cards": [
+    {
+      "name": "Lana's Aid",
+      "id": "sv6-155",
+      "supertype": "Trainer",
+      "subtypes": ["Supporter"],
+      "rules": ["Put up to 3 in any combination of Pokemon and Basic Energy cards from your discard pile into your hand."],
+      "abilities": [],
+      "attacks": [],
+      "set": {"id": "sv6", "name": "Twilight Masquerade", "ptcgo_code": "TWM"},
+      "number": "155",
+      "regulation_mark": "H",
+      "standard_legal_by_regulation_mark": true
+    },
+    {
+      "name": "Ultra Ball",
+      "id": "sv1-196",
+      "supertype": "Trainer",
+      "subtypes": ["Item"],
+      "rules": ["You can use this card only if you discard 2 other cards from your hand. Search your deck for a Pokemon, reveal it, and put it into your hand. Then, shuffle your deck."],
+      "abilities": [],
+      "attacks": [],
+      "set": {"id": "sv1", "name": "Scarlet & Violet", "ptcgo_code": "SVI"},
+      "number": "196",
+      "regulation_mark": "G",
+      "standard_legal_by_regulation_mark": false
+    },
+    {
+      "name": "Rescue Board",
+      "id": "sv5-159",
+      "supertype": "Trainer",
+      "subtypes": ["Pokemon Tool"],
+      "rules": ["The Retreat Cost of the Pokemon this card is attached to is Colorless less. If that Pokemon has 30 HP or less remaining, it has no Retreat Cost."],
+      "abilities": [],
+      "attacks": [],
+      "set": {"id": "sv5", "name": "Temporal Forces", "ptcgo_code": "TEF"},
+      "number": "159",
+      "regulation_mark": "H",
+      "standard_legal_by_regulation_mark": true
+    },
+    {
+      "name": "Buddy-Buddy Poffin",
+      "id": "sv5-144",
+      "supertype": "Trainer",
+      "subtypes": ["Item"],
+      "rules": ["Search your deck for up to 2 Basic Pokemon with 70 HP or less and put them onto your Bench. Then, shuffle your deck."],
+      "abilities": [],
+      "attacks": [],
+      "set": {"id": "sv5", "name": "Temporal Forces", "ptcgo_code": "TEF"},
+      "number": "144",
+      "regulation_mark": "H",
+      "standard_legal_by_regulation_mark": true
+    },
+    {
+      "name": "Artazon",
+      "id": "sv2-171",
+      "supertype": "Trainer",
+      "subtypes": ["Stadium"],
+      "rules": ["Once during each player's turn, that player may search their deck for a Basic Pokemon that doesn't have a Rule Box and put it onto their Bench. Then, that player shuffles their deck."],
+      "abilities": [],
+      "attacks": [],
+      "set": {"id": "sv2", "name": "Paldea Evolved", "ptcgo_code": "PAL"},
+      "number": "171",
+      "regulation_mark": "G",
+      "standard_legal_by_regulation_mark": false
+    }
+  ]
+}

@@ -167,6 +167,23 @@ The Deck Coach writes:
 - `data/analysis/deck_coach_report.json`
 - `data/analysis/deck_coach_prompt.json`
 
+Build or refresh the local Standard card database:
+
+```bash
+python3 scripts/build_standard_card_db.py
+```
+
+Generate deterministic card candidates for the current deck problem:
+
+```bash
+python3 scripts/recommend_cards.py
+```
+
+The recommendation engine writes:
+
+- `data/cards/standard_cards.json`
+- `data/analysis/card_recommendations.json`
+
 Track a deck experiment:
 
 ```bash

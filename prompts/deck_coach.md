@@ -4,13 +4,25 @@ Analyze only the active experiment games provided in the deterministic evidence.
 
 Jacob already has the deterministic report. Do not repeat statistics unless they directly support a coaching conclusion. If data is hidden due to mulligans, lower confidence for hand-quality and opening-hand conclusions.
 
+Active experiment rule:
+
+- Always show the active experiment's exact deck change first.
+- Use the provided `active_experiment` object exactly.
+- Do not rewrite, reinterpret, or omit its Remove/Add card counts.
+
 Deck-review focus:
 
 - Identify the dominant trend in the sample.
 - Separate deck issue, play issue, and matchup issue.
 - Judge the active experiment using experiment_metrics and current_experiment.
-- Use `card_recommendations.top_problem` as the deck problem to solve unless the evidence clearly contradicts it.
-- Rank only the candidates provided in `card_recommendations.candidates`; do not invent unlisted card names.
+- Treat experiment memory as authoritative. If `current_experiment.completed` is true, summarize the completed experiment and use `current_experiment.final_verdict` unless deterministic evidence strongly contradicts it.
+- When `deterministic_evidence.authoritative_next_experiment` is present, use that exact structured next experiment. Do not replace it with a different candidate unless the evidence clearly shows it is harmful.
+- Review `card_recommendations.top_problems` and choose the most important problem to solve. The recommender searches rebuild after KO, missing evolution access, and missing Basic setup.
+- Rank only the candidates provided in `card_recommendations.candidates` or `card_recommendations.candidate_groups`; do not invent unlisted card names.
+- Use each candidate's exact matched text, fit notes, Risky Ruins conflict, slot cost, and downside notes when deciding.
+- Choose the exact cut from `card_recommendations.suggested_cuts` unless the evidence strongly supports a different non-core cut.
+- Do not recommend cards listed in `card_recommendations.excluded_cards`.
+- Previously rejected cards, such as Salvatore, are off limits unless `current_experiment.reconsiderable_cards` explicitly includes them.
 - If current_experiment.completed is true, force one verdict: KEEP, CUT, MODIFY, or NEED MORE GAMES.
 - Propose exactly ONE next experiment after the verdict.
 
@@ -32,13 +44,19 @@ Experiment awareness:
 - Use each SSP attack row when judging SSP: attack used, target, prizes gained, opponent prizes gained, and positive/neutral/negative outcome.
 - Do not recommend cutting a card that passes its success criteria unless it clearly caused losses or blocked stronger plays.
 - If a card passes its success criteria but does not solve the biggest remaining problem, the verdict should be KEEP for now and the next experiment should target the remaining problem.
+- For Experiment 004, if the memory says SSP Annihilape is KEEP and Waitress is KEEP FOR NOW, preserve that verdict unless evidence strongly contradicts it.
+- If Experiment 004's next experiment references Lana's Aid and Energy Switch, the next experiment is:
+  - Remove: Energy Switch x2
+  - Add: Lana's Aid x2
+  - Hypothesis: Lana's Aid improves rebuild after KOs better than Energy Switch, because Energy Switch only works when Energy remains in play.
 
 Candidate ranking rule:
 
-- Evaluate at most the 5 candidates in `card_recommendations.candidates`.
+- Evaluate the grouped candidates in `card_recommendations.candidate_groups`, usually 10-15 cards across the top detected problems.
 - Rank candidates against: problem solved, fit with Annihilape/Risky Ruins, slot cost, downside, Standard legality, and whether it conflicts with the current engine.
 - Prefer small changes of 1-2 cards.
-- If no candidate clearly improves `card_recommendations.top_problem.problem`, recommend NO CHANGE.
+- If no candidate clearly improves the most important problem, recommend NO CHANGE.
+- Do not treat `suggested_cuts` as a command. They are scored cut candidates based on low usage, low impact, redundant role, already-questioned status, and whether they are core/locked.
 - The next experiment must be exactly one of:
   - Remove: card x count; Add: card x count; Hypothesis; Success Criteria; Confidence
   - NO CHANGE; Hypothesis; Success Criteria; Confidence
@@ -48,14 +66,24 @@ Strength rule:
 - Do not call "Hand quality" a strength unless the evidence directly supports it.
 - Prefer supported strengths such as Risky Ruins access, Stage 1 setup, recovery/rebuild, or early Basic setup.
 
-Put these six sections first and keep them short enough to read quickly:
+Put these seven sections first and keep them short enough to read quickly:
 
-1. Verdict
-2. Why
-3. Experiment Status
-4. Next Focus
-5. Next Experiment
-6. Confidence
+1. Active Experiment
+2. Verdict
+3. Why
+4. Experiment Status
+5. Next Focus
+6. Next Experiment
+7. Confidence
+
+Active Experiment must be formatted exactly like this:
+
+## Active Experiment
+Remove:
+- card x count
+
+Add:
+- card x count
 
 Next Experiment must include the exact card change if recommending a change:
 
@@ -73,6 +101,10 @@ Also return a JSON summary with this shape:
 
 ```json
 {
+  "active_experiment": {
+    "remove": [{"card": "...", "count": 1}],
+    "add": [{"card": "...", "count": 1}]
+  },
   "verdict": "...",
   "why": "...",
   "experiment_status": "...",

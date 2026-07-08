@@ -55,6 +55,32 @@
       "standard_legal_by_regulation_mark": true
     },
     {
+      "name": "Brock's Scouting",
+      "id": "sv10-145",
+      "supertype": "Trainer",
+      "subtypes": ["Supporter"],
+      "rules": ["Search your deck for up to 2 Evolution Pokemon, reveal them, and put them into your hand. Then, shuffle your deck."],
+      "abilities": [],
+      "attacks": [],
+      "set": {"id": "sv10", "name": "Destined Rivals", "ptcgo_code": "DRI"},
+      "number": "145",
+      "regulation_mark": "I",
+      "standard_legal_by_regulation_mark": true
+    },
+    {
+      "name": "Salvatore",
+      "id": "sv5-160",
+      "supertype": "Trainer",
+      "subtypes": ["Supporter"],
+      "rules": ["Search your deck for a card that evolves from 1 of your Pokemon and put it onto that Pokemon to evolve it. Then, shuffle your deck. You can use this card only if that Pokemon was put into play this turn."],
+      "abilities": [],
+      "attacks": [],
+      "set": {"id": "sv5", "name": "Temporal Forces", "ptcgo_code": "TEF"},
+      "number": "160",
+      "regulation_mark": "H",
+      "standard_legal_by_regulation_mark": true
+    },
+    {
       "name": "Artazon",
       "id": "sv2-171",
       "supertype": "Trainer",

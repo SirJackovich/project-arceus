@@ -2,6 +2,31 @@
 
 Each Codex change should add a new entry that says what changed, why it changed, and how to test it.
 
+## v0.9.4
+
+- What changed: Deck Coach context and output instructions now always include the active experiment's exact Remove/Add deck change.
+- What changed: Structured card-change terminal formatting now renders as `Card x count`.
+- What changed: Standard card recommendations exclude previously rejected cards such as Salvatore unless experiment memory marks them reconsiderable.
+- Why: Deck reviews should keep the current test visible and avoid resurfacing rejected cards without an explicit reason.
+- How to test: Run `python3 scripts/check_project.py` and `python3 scripts/deck_coach.py --experiment current --dry-run`.
+
+## v0.9.3
+
+- What changed: Expanded Standard card recommendations across the top three deck problems: rebuild after KO, missing evolution access, and missing Basic setup.
+- What changed: Candidate cards now include exact matched text, problem-fit explanation, Annihilape downside notes, slot cost, and Risky Ruins conflict notes.
+- What changed: Deck Coach now receives 10-15 grouped candidates by default and scored cut candidates based on usage, impact, redundancy, questioned status, and core-card protection.
+- What changed: Added a sanity rule that keeps Lana's Aid in the candidate list when experiment memory says to test it over Energy Switch.
+- Why: The LLM should choose the best problem, card, and cut from richer evidence instead of inheriting one narrow keyword result.
+- How to test: Run `python3 scripts/check_project.py` and `python3 scripts/recommend_cards.py --max-cards 12`.
+
+## v0.9.2
+
+- What changed: Made completed experiment memory authoritative for Deck Coach by passing a structured next experiment from `data/experiments/current.json`.
+- What changed: Added Experiment 004 rollover logic so the completed SSP Annihilape + Waitress experiment archives itself and activates Experiment 005, Lana's Aid Rebuild Consistency.
+- What changed: Experiment 005 is defined as Remove Energy Switch x2, Add Lana's Aid x2, with the rebuild-after-KO hypothesis.
+- Why: Deck Coach should not keep re-evaluating completed experiments or override a completed experiment's final verdict without strong evidence.
+- How to test: Run `python3 scripts/check_project.py` and `python3 scripts/deck_coach.py --experiment current --dry-run`.
+
 ## v0.9.1
 
 - What changed: Deck Coach terminal output now includes the exact next experiment card change when the LLM returns one.

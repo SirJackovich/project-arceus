@@ -117,13 +117,13 @@ def format_terminal_value(value: Any) -> str:
         if removes:
             lines.append("Remove:")
             for row in removes:
-                lines.append(f"- {row.get('count', 1)} {row.get('card', '')}".rstrip())
+                lines.append(f"- {row.get('card', '')} x{row.get('count', 1)}".rstrip())
         if adds:
             if lines:
                 lines.append("")
             lines.append("Add:")
             for row in adds:
-                lines.append(f"- {row.get('count', 1)} {row.get('card', '')}".rstrip())
+                lines.append(f"- {row.get('card', '')} x{row.get('count', 1)}".rstrip())
         if value.get("hypothesis"):
             lines.extend(["", "Hypothesis:", str(value["hypothesis"])])
         criteria = value.get("success_criteria") or []

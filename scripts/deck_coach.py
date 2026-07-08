@@ -19,7 +19,16 @@ from src.ai_coaching import (
     run_llm_report,
 )
 from src.card_recommender import load_card_database, search_candidates
-from src.experiment_memory import game_label, game_number, is_completed, read_current, rows_in_experiment
+from src.experiment_memory import (
+    active_experiment_change,
+    authoritative_next_experiment,
+    game_label,
+    game_number,
+    is_completed,
+    read_current,
+    rollover_to_next_experiment,
+    rows_in_experiment,
+)
 
 
 def summarize_games(games: list[dict]) -> dict:
@@ -93,10 +102,12 @@ def compact_evidence(evidence: dict, args: argparse.Namespace, experiment: dict)
     recent_games = selected_experiment_games(evidence, args, experiment)
     selected_ids = {game.get("game_id", "") for game in recent_games}
     selected_labels = {game.get("game") or game_label(game.get("game_id", "")) for game in recent_games}
+    structured_next = authoritative_next_experiment(experiment) if is_completed(experiment) else {}
     return {
         "layer": evidence.get("layer", "deterministic_analyzer"),
         "scope": "active experiment games" if args.experiment == "current" else evidence.get("scope", ""),
         "experiment_completed": is_completed(experiment),
+        "authoritative_next_experiment": structured_next,
         "summary": summarize_games(recent_games),
         "recent_games": recent_games,
         "selected_game_ids": sorted(selected_ids, key=game_number),
@@ -123,9 +134,16 @@ def build_context(args: argparse.Namespace) -> dict:
         raise SystemExit(f"Missing deterministic evidence JSON: {args.evidence_json}")
     deck = read_json(args.deck, {})
     experiment = read_current(args.experiment_state) if args.experiment == "current" else read_json(args.experiment_state, DEFAULT_EXPERIMENT) or DEFAULT_EXPERIMENT
+    experiment_change = active_experiment_change(experiment)
     scoped_evidence = compact_evidence(evidence, args, experiment)
     if Path(args.card_db).exists():
-        scoped_evidence["card_recommendations"] = search_candidates(scoped_evidence, deck, load_card_database(args.card_db), args.max_candidates)
+        scoped_evidence["card_recommendations"] = search_candidates(
+            scoped_evidence,
+            deck,
+            load_card_database(args.card_db),
+            args.max_candidates,
+            experiment=experiment,
+        )
     else:
         scoped_evidence["card_recommendations"] = {
             "status": "missing_card_database",
@@ -138,6 +156,7 @@ def build_context(args: argparse.Namespace) -> dict:
         "instructions": "Use deterministic evidence only. Analyze active experiment games, deck construction, and experiment results.",
         "deck": compact_deck(deck),
         "current_experiment": experiment,
+        "active_experiment": experiment_change,
         "deterministic_evidence": scoped_evidence,
     }
 
@@ -149,7 +168,7 @@ def main() -> int:
     parser.add_argument("--experiment-state", default="data/experiments/current.json")
     parser.add_argument("--experiment", choices=["current", "last"], default="last", help="Use current experiment games or generic last-N scope.")
     parser.add_argument("--card-db", default="data/cards/standard_cards.json", help="Local Standard card database JSON.")
-    parser.add_argument("--max-candidates", type=int, default=5)
+    parser.add_argument("--max-candidates", type=int, default=12)
     parser.add_argument("--prompt", default="prompts/deck_coach.md")
     parser.add_argument("--last", type=int, default=10)
     parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL", DEFAULT_MODEL))
@@ -163,6 +182,7 @@ def main() -> int:
     prompt = Path(args.prompt).read_text(encoding="utf-8")
     context = build_context(args)
     labels = [
+        ("Active Experiment", "active_experiment"),
         ("Verdict", "verdict"),
         ("Why", "why"),
         ("Experiment Status", "experiment_status"),
@@ -170,7 +190,12 @@ def main() -> int:
         ("Next Experiment", "next_experiment"),
         ("Confidence", "confidence"),
     ]
-    return run_llm_report(args, prompt, context, "Deck Coach", labels)
+    result = run_llm_report(args, prompt, context, "Deck Coach", labels)
+    if result == 0 and args.experiment == "current" and not args.dry_run and is_completed(context.get("current_experiment")):
+        next_experiment = rollover_to_next_experiment(args.experiment_state)
+        if args.verbose:
+            print(f"Experiment memory advanced to {next_experiment.get('id')}: {next_experiment.get('name')}")
+    return result
 
 
 if __name__ == "__main__":

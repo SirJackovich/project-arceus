@@ -12,6 +12,7 @@ if str(ROOT) not in sys.path:
 
 from src.ai_coaching import read_json, write_json
 from src.card_recommender import load_card_database, search_candidates
+from src.experiment_memory import read_current
 
 
 def main() -> int:
@@ -19,14 +20,16 @@ def main() -> int:
     parser.add_argument("--evidence-json", default="data/analysis/deterministic_analysis.json")
     parser.add_argument("--deck", default="decks/annihilape/v01.json")
     parser.add_argument("--card-db", default="data/cards/standard_cards.json")
+    parser.add_argument("--experiment-state", default="data/experiments/current.json")
     parser.add_argument("--output-json", default="data/analysis/card_recommendations.json")
-    parser.add_argument("--max-cards", type=int, default=5)
+    parser.add_argument("--max-cards", type=int, default=12)
     args = parser.parse_args()
 
     evidence = read_json(args.evidence_json, {}) or {}
     deck = read_json(args.deck, {}) or {}
+    experiment = read_current(args.experiment_state)
     cards = load_card_database(args.card_db)
-    recommendations = search_candidates(evidence, deck, cards, args.max_cards)
+    recommendations = search_candidates(evidence, deck, cards, args.max_cards, experiment=experiment)
     recommendations["card_database"] = args.card_db
     write_json(args.output_json, recommendations)
     print(json.dumps(recommendations, indent=2, ensure_ascii=False))

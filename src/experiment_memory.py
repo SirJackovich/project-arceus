@@ -2,6 +2,7 @@
 
 import csv
 import json
+import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Iterable, Optional
@@ -28,6 +29,18 @@ DEFAULT_CURRENT_EXPERIMENT = {
     "final_verdict": "",
     "next_experiment": "",
 }
+
+LANA_AID_EXPERIMENT_ID = "005"
+LANA_AID_EXPERIMENT_NAME = "Lana's Aid Rebuild Consistency"
+LANA_AID_HYPOTHESIS = (
+    "Lana's Aid improves rebuild after KOs better than Energy Switch, "
+    "because Energy Switch only works when Energy remains in play."
+)
+LANA_AID_SUCCESS_CRITERIA = [
+    "After the first Annihilape line is KO'd, the deck can rebuild to another attacker more often.",
+    "Lana's Aid creates visible recovery or energy attachment value in multiple games.",
+    "Replacing Energy Switch does not noticeably reduce early attack tempo.",
+]
 
 
 def game_number(game_id: str) -> int:
@@ -61,6 +74,12 @@ def write_current(experiment: dict, path: str = "data/experiments/current.json")
     path_obj = Path(path)
     path_obj.parent.mkdir(parents=True, exist_ok=True)
     path_obj.write_text(json.dumps(experiment, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def slugify(value: str) -> str:
+    value = value.lower().replace("'", "")
+    value = re.sub(r"[^a-z0-9]+", "-", value).strip("-")
+    return value or "experiment"
 
 
 def manifest_rows(path: str = "data/manifest.csv") -> list[dict]:
@@ -121,6 +140,107 @@ def sync_current_from_manifest(current_path: str = "data/experiments/current.jso
     updated = sync_progress(experiment, manifest_rows(manifest_path))
     write_current(updated, current_path)
     return updated
+
+
+def last_completed_game_number(experiment: dict) -> int:
+    games = experiment.get("games", [])
+    numbers = [game_number(game.get("game_id", "")) for game in games if isinstance(game, dict)]
+    return max(numbers) if numbers else int(experiment.get("start_game") or 0) - 1
+
+
+def authoritative_next_experiment(experiment: dict) -> dict:
+    """Convert completed experiment memory into a structured next experiment when possible."""
+    text = (experiment.get("next_experiment") or "").lower()
+    is_lana_aid_request = "lana" in text and "energy switch" in text
+    if experiment.get("id") == "004" or is_lana_aid_request:
+        return {
+            "remove": [{"card": "Energy Switch", "count": 2}],
+            "add": [{"card": "Lana's Aid", "count": 2}],
+            "hypothesis": LANA_AID_HYPOTHESIS,
+            "success_criteria": LANA_AID_SUCCESS_CRITERIA,
+            "confidence": "medium",
+            "source": "current_experiment.next_experiment",
+        }
+    return {}
+
+
+def build_lana_aid_experiment(previous_experiment: dict) -> dict:
+    start_game = last_completed_game_number(previous_experiment) + 1
+    return {
+        "id": LANA_AID_EXPERIMENT_ID,
+        "name": LANA_AID_EXPERIMENT_NAME,
+        "deck_changes": [
+            "Remove Energy Switch x2",
+            "Add Lana's Aid x2",
+        ],
+        "hypothesis": LANA_AID_HYPOTHESIS,
+        "success_criteria": LANA_AID_SUCCESS_CRITERIA,
+        "start_game": start_game,
+        "games_target": 10,
+        "target_games": 10,
+        "cards_being_tested": ["Lana's Aid"],
+        "games_completed": 0,
+        "games": [],
+        "completed": False,
+        "status": "active",
+        "previous_experiment_id": previous_experiment.get("id", ""),
+        "rejected_cards": ["Salvatore"],
+        "reconsiderable_cards": [],
+        "final_verdict": "",
+        "next_experiment": "",
+    }
+
+
+def parse_deck_change_line(line: str) -> dict:
+    normalized = line.strip()
+    match = re.match(r"^(Remove|Add)\s+(.+?)\s+x(\d+)$", normalized, flags=re.IGNORECASE)
+    if not match:
+        return {}
+    action, card, count = match.groups()
+    return {"action": action.lower(), "card": card.strip(), "count": int(count)}
+
+
+def active_experiment_change(experiment: dict) -> dict:
+    """Return the active experiment's exact Remove/Add change in a coach-friendly shape."""
+    changes = {"remove": [], "add": []}
+    for line in experiment.get("deck_changes", []):
+        parsed = parse_deck_change_line(str(line))
+        if not parsed:
+            continue
+        changes[f"{parsed['action']}"].append({"card": parsed["card"], "count": parsed["count"]})
+    if not changes["remove"] and not changes["add"]:
+        return {}
+    changes["name"] = experiment.get("name", "")
+    changes["id"] = experiment.get("id", "")
+    return changes
+
+
+def archive_experiment_path(experiment: dict, directory: Path) -> Path:
+    experiment_id = experiment.get("id", "unknown")
+    name = slugify(experiment.get("name") or experiment_id)
+    return directory / f"{experiment_id}-{name}.json"
+
+
+def rollover_to_next_experiment(current_path: str = "data/experiments/current.json") -> dict:
+    """Archive a completed current experiment and make the next experiment active."""
+    current_path_obj = Path(current_path)
+    experiment = read_current(current_path)
+    if not is_completed(experiment):
+        return experiment
+    next_change = authoritative_next_experiment(experiment)
+    if not next_change:
+        return experiment
+
+    directory = current_path_obj.parent
+    directory.mkdir(parents=True, exist_ok=True)
+    archive_path = archive_experiment_path(experiment, directory)
+    archive_path.write_text(json.dumps(experiment, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    next_experiment = build_lana_aid_experiment(experiment)
+    next_path = directory / "005-lanas-aid.json"
+    next_path.write_text(json.dumps(next_experiment, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    write_current(next_experiment, current_path)
+    return next_experiment
 
 
 def progress_line(experiment: dict) -> str:

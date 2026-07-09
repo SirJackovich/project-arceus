@@ -2,6 +2,15 @@
 
 Each Codex change should add a new entry that says what changed, why it changed, and how to test it.
 
+## v0.10.3
+
+- What changed: Game Coach now separates low-impact issues into Secondary Note instead of over-labeling them as Biggest Mistake.
+- What changed: Game Coach mistake judgment now prioritizes missed rebuild/evolution sequence, wrong attacker choice, bad prize trade, avoidable Bench loss, and experiment-card misuse over chip damage.
+- What changed: Game Coach now explicitly checks follow-up attacker readiness after a big SSP Annihilape Destined Fight trade.
+- What changed: Experiment Status must include one sentence of evidence.
+- Why: Game Coach should identify the true cause of a loss rather than fixating on minor early attacks.
+- How to test: Run `python3 scripts/check_project.py` and `python3 scripts/game_coach.py --game latest --dry-run`.
+
 ## v0.10.2
 
 - What changed: Game Coach and Deck Coach now save historical Markdown, JSON, and prompt snapshots in `data/coaching_sessions/`.

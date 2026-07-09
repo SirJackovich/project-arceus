@@ -283,6 +283,7 @@ def main() -> int:
         ("Biggest Lesson", "biggest_lesson"),
         ("Experiment Status", "experiment_status"),
         ("Biggest Mistake", "biggest_mistake"),
+        ("Secondary Note", "secondary_note"),
         ("Next Game Focus", "next_game_focus"),
     ]
     return run_llm_report(args, prompt, context, "Game Coach", labels)

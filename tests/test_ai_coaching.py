@@ -43,6 +43,7 @@ def test_terminal_report_uses_game_coach_contract_without_verdict() -> None:
             "biggest_lesson": "Tempo can matter more than first Annihilape timing.",
             "experiment_status": "Neutral",
             "biggest_mistake": "No significant mistakes detected.",
+            "secondary_note": "Hawlucha's early 30 damage was low impact.",
             "next_game_focus": "Track whether the early attacker creates a real prize lead.",
         },
         "Game Coach",
@@ -51,11 +52,13 @@ def test_terminal_report_uses_game_coach_contract_without_verdict() -> None:
             ("Biggest Lesson", "biggest_lesson"),
             ("Experiment Status", "experiment_status"),
             ("Biggest Mistake", "biggest_mistake"),
+            ("Secondary Note", "secondary_note"),
             ("Next Game Focus", "next_game_focus"),
         ],
     )
 
     assert "## Win/Loss" in rendered
+    assert "## Secondary Note" in rendered
     assert "## Next Game Focus" in rendered
 
 

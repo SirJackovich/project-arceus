@@ -265,7 +265,7 @@ python3 -m pip install -r requirements.txt
 
 ## Coaching Contracts
 
-Game Coach answers exactly: Win/Loss, Biggest Lesson, Experiment Status, Biggest Mistake, and Next Game Focus.
+Game Coach answers exactly: Win/Loss, Biggest Lesson, Experiment Status, Biggest Mistake, Secondary Note, and Next Game Focus.
 
 Deck Coach answers exactly: Is The Current Experiment Finished, What Did We Actually Learn, What Deck Change Do You Recommend, Confidence, and Next Experiment.
 

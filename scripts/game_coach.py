@@ -270,6 +270,8 @@ def main() -> int:
     parser.add_argument("--output-md", default="data/analysis/game_coach_report.md")
     parser.add_argument("--output-json", default="data/analysis/game_coach_report.json")
     parser.add_argument("--prompt-out", default="data/analysis/game_coach_prompt.json")
+    parser.add_argument("--snapshot-dir", default="data/coaching_sessions")
+    parser.add_argument("--no-snapshot", action="store_true", help="Only write latest report outputs.")
     parser.add_argument("--dry-run", action="store_true", help="Write the prompt/context without calling the LLM.")
     parser.add_argument("--verbose", action="store_true", help="Print the full report and output paths.")
     args = parser.parse_args()

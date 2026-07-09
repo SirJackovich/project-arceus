@@ -161,11 +161,15 @@ The Game Coach writes:
 - `data/analysis/game_coach_report.json`
 - `data/analysis/game_coach_prompt.json`
 
+Each run also saves game-log-style snapshots in `data/coaching_sessions/`, for example `game_052_20260709_loss_vs_omekarawo5005_v02_game_coach.md`.
+
 The Deck Coach writes:
 
 - `data/analysis/deck_coach_report.md`
 - `data/analysis/deck_coach_report.json`
 - `data/analysis/deck_coach_prompt.json`
+
+Each run also saves range-based snapshots in `data/coaching_sessions/`, using the first and last selected game IDs.
 
 Build or refresh the local Standard card database:
 

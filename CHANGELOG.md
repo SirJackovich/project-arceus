@@ -2,6 +2,13 @@
 
 Each Codex change should add a new entry that says what changed, why it changed, and how to test it.
 
+## v0.10.2
+
+- What changed: Game Coach and Deck Coach now save historical Markdown, JSON, and prompt snapshots in `data/coaching_sessions/`.
+- What changed: Snapshot filenames use game-log-style stems, such as `game_052_20260709_loss_vs_omekarawo5005_v02_game_coach.md` for Game Coach and a first-through-last game range for Deck Coach.
+- Why: Latest coach files are useful for quick review, but individual coach responses should be preserved for later experiment auditing.
+- How to test: Run `python3 scripts/check_project.py` and `python3 -m pytest tests/test_ai_coaching.py`.
+
 ## v0.10.1
 
 - What changed: `scripts/post_game.py` now defaults the import deck version to the previous manifest entry instead of always using `decks/annihilape/v01.json`.

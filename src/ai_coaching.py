@@ -62,6 +62,12 @@ def generated_at() -> str:
     return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
+def slugify(text: str) -> str:
+    text = str(text or "").strip().lower()
+    text = re.sub(r"[^a-z0-9]+", "_", text)
+    return text.strip("_")
+
+
 def call_openai(prompt: str, context: dict, model: str, api_key: str) -> dict:
     body = {
         "model": model,
@@ -172,8 +178,65 @@ def terminal_report(markdown: str, summary: dict, title: str, labels: list) -> s
     return title + "\n\n" + markdown[:1600].rstrip() + "\n"
 
 
+def game_log_like_snapshot_prefix(context: dict, terminal_title: str) -> str:
+    coach_type = slugify(context.get("coach_type") or terminal_title)
+    evidence = context.get("deterministic_evidence", {}) if isinstance(context, dict) else {}
+    if context.get("coach_type") == "game_coach":
+        game = evidence.get("game", {}) if isinstance(evidence, dict) else {}
+        game_id = game.get("game_id") or "unknown_game"
+        return f"{slugify(game_id)}_{coach_type}"
+
+    selected_ids = evidence.get("selected_game_ids", []) if isinstance(evidence, dict) else []
+    selected_ids = [slugify(game_id) for game_id in selected_ids if game_id]
+    if selected_ids:
+        if len(selected_ids) == 1:
+            scope = selected_ids[0]
+        else:
+            scope = f"{selected_ids[0]}_through_{selected_ids[-1]}"
+    else:
+        scope = slugify(evidence.get("scope", "")) or "unknown_scope"
+    return f"{scope}_{coach_type}"
+
+
+def unique_snapshot_path(path: Path) -> Path:
+    if not path.exists():
+        return path
+    timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
+    candidate = path.with_name(f"{path.stem}_{timestamp}{path.suffix}")
+    if not candidate.exists():
+        return candidate
+    for index in range(2, 1000):
+        indexed = path.with_name(f"{path.stem}_{timestamp}_{index}{path.suffix}")
+        if not indexed.exists():
+            return indexed
+    raise RuntimeError(f"Could not find an available snapshot filename for {path}")
+
+
+def write_llm_snapshot(args: Any, rendered: str, summary: dict, prompt_payload: dict, context: dict, terminal_title: str) -> list[str]:
+    if getattr(args, "no_snapshot", False):
+        return []
+    snapshot_dir = Path(getattr(args, "snapshot_dir", "data/coaching_sessions"))
+    prefix = game_log_like_snapshot_prefix(context, terminal_title)
+    paths = [
+        unique_snapshot_path(snapshot_dir / f"{prefix}.md"),
+        unique_snapshot_path(snapshot_dir / f"{prefix}.json"),
+        unique_snapshot_path(snapshot_dir / f"{prefix}_prompt.json"),
+    ]
+    write_text(str(paths[0]), rendered)
+    write_json(str(paths[1]), summary)
+    write_json(str(paths[2]), prompt_payload)
+    return [str(path) for path in paths]
+
+
+def write_llm_outputs(args: Any, rendered: str, summary: dict, prompt_payload: dict, context: dict, terminal_title: str) -> list[str]:
+    write_text(args.output_md, rendered)
+    write_json(args.output_json, summary)
+    return write_llm_snapshot(args, rendered, summary, prompt_payload, context, terminal_title)
+
+
 def run_llm_report(args: Any, prompt: str, context: dict, terminal_title: str, labels: list) -> int:
-    write_json(args.prompt_out, {"prompt": prompt, "context": context, "model": args.model})
+    prompt_payload = {"prompt": prompt, "context": context, "model": args.model}
+    write_json(args.prompt_out, prompt_payload)
 
     if args.dry_run:
         rendered = f"# {terminal_title}\n\nDry run only. Prompt context written to `{args.prompt_out}`.\n"
@@ -196,20 +259,26 @@ def run_llm_report(args: Any, prompt: str, context: dict, terminal_title: str, l
                 "message": str(exc),
                 "prompt_out": args.prompt_out,
             }
-            write_text(args.output_md, rendered)
-            write_json(args.output_json, summary)
+            snapshot_paths = write_llm_outputs(args, rendered, summary, prompt_payload, context, terminal_title)
             print(rendered if args.verbose else terminal_report(rendered, summary, terminal_title, labels))
             if args.verbose:
                 print(f"\nWrote {args.output_md} and {args.output_json}")
+                if snapshot_paths:
+                    print("Snapshot files:")
+                    for path in snapshot_paths:
+                        print(f"- {path}")
             raise
         rendered = response_text(response)
         summary = extract_json_summary(rendered)
         summary["model"] = args.model
         summary["response_id"] = response.get("id", "")
 
-    write_text(args.output_md, rendered)
-    write_json(args.output_json, summary)
+    snapshot_paths = write_llm_outputs(args, rendered, summary, prompt_payload, context, terminal_title)
     print(rendered if args.verbose else terminal_report(rendered, summary, terminal_title, labels))
     if args.verbose:
         print(f"\nWrote {args.output_md} and {args.output_json}")
+        if snapshot_paths:
+            print("Snapshot files:")
+            for path in snapshot_paths:
+                print(f"- {path}")
     return 0

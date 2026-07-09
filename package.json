@@ -1,6 +1,6 @@
 {
   "name": "project-arceus",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "private": true,
   "description": "CLI-first Pokemon TCG Live coaching analysis tools.",
   "type": "module",

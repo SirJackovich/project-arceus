@@ -230,6 +230,26 @@ def previous_ending_rank(manifest_path):
     return rows[-1].get("ranked_points_after", "")
 
 
+def canonical_deck_version(deck_version):
+    if not deck_version:
+        return DEFAULT_DECK_VERSION
+    deck_path = Path(deck_version)
+    if deck_path.exists():
+        return deck_version
+    if deck_path.parts and deck_path.parts[0] == "deck":
+        corrected = Path("decks", *deck_path.parts[1:])
+        if corrected.exists():
+            return str(corrected)
+    return deck_version
+
+
+def previous_deck_version(manifest_path):
+    rows = read_manifest_rows(manifest_path)
+    if not rows:
+        return DEFAULT_DECK_VERSION
+    return canonical_deck_version(rows[-1].get("deck_version", ""))
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Paste a Pokemon TCG Live battle log and save it with match metadata."
@@ -237,7 +257,7 @@ def main():
     parser.add_argument("--logs-dir", default=DEFAULT_LOGS_DIR, type=Path)
     parser.add_argument("--manifest", default=DEFAULT_MANIFEST, type=Path)
     parser.add_argument("--manifest-json", default=DEFAULT_MANIFEST_JSON, type=Path)
-    parser.add_argument("--deck-version", default=DEFAULT_DECK_VERSION)
+    parser.add_argument("--deck-version", default="")
     parser.add_argument("--filename", help="Override the generated log filename.")
     parser.add_argument("--player", default=DEFAULT_PLAYER)
     parser.add_argument("--source", default="terminal_paste")
@@ -266,7 +286,7 @@ def main():
     print()
     print("Now add the remaining match metadata. Press Enter to accept defaults.")
     match_date = ask("Match date", default_match_date)
-    deck_version = ask("Deck version", args.deck_version)
+    deck_version = ask("Deck version", args.deck_version or previous_deck_version(args.manifest))
     ranked_before = ask("Ranked points before", previous_ending_rank(args.manifest))
     ranked_after = ask("Ranked points after")
     notes = ask("Short notes")

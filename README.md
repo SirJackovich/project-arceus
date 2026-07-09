@@ -8,8 +8,8 @@ Project Arceus is a CLI-first coaching tool for reviewing Pokemon TCG Live battl
 
 Project Arceus uses a two-layer coaching system:
 
-- Layer 1: deterministic Python analyzer. It parses logs and writes structured evidence to `data/analysis/deterministic_analysis.json`.
-- Layer 2: AI coaches. Game Coach reviews only the current game; Deck Coach reviews last-N-game trends, deck construction, and experiment results.
+- Layer 1: deterministic Python analyzer. It parses logs and writes objective facts to `data/analysis/deterministic_analysis.json`: what happened, which cards were played, which attacks happened, which goals succeeded or failed, and which experiment is active.
+- Layer 2: AI coaches. Game Coach and Deck Coach explain why those facts matter, what Jacob should learn, whether the experiment taught anything, and what one focused test should happen next.
 
 ## Current Features
 
@@ -17,9 +17,9 @@ Project Arceus uses a two-layer coaching system:
 - Generates CSV/JSON/XLSX analysis outputs in `data/analysis/`.
 - Tracks game results, opening choices, card usage, attacks, prize events, and success-condition checks.
 - Writes deterministic evidence for AI coaching, including mulligans, card flow, Annihilape attack quality, Risky Ruins timing, evolution bottlenecks, backup attacker state, possible loss factors, and confidence notes.
-- Generates optional AI-written Game Coach and Deck Coach reports from deterministic evidence instead of raw logs.
+- Generates optional AI-written Game Coach and Deck Coach recommendations from deterministic evidence instead of raw logs.
 - Tracks the current deck experiment in `data/experiments/current.json`.
-- Stores the current Annihilape deck as `decks/annihilape/v01.json` and `v01.md`.
+- Stores versioned Annihilape decklists under `decks/annihilape/`.
 - Stores fetched card details in `decks/annihilape/card_details.json` and `card_details.md`.
 - Provides reusable prompt templates for summaries, coaching, and deck recommendations.
 
@@ -253,15 +253,21 @@ python3 -m pip install -r requirements.txt
 2. Run `python3 scripts/post_game.py`.
 3. Paste the battle log, then type `::END_LOG::` on its own line.
 4. Confirm the inferred opponent, result, first-player, and concession values.
-5. Answer the remaining metadata prompts for date, deck version, starting rank, ending rank after this game, and notes. Starting rank defaults to the previous manifest entry's ending rank.
+5. Answer the remaining metadata prompts for date, deck version, starting rank, ending rank after this game, and notes. Deck version and starting rank default to the previous manifest entry's deck and ending rank.
 6. Let Project Arceus run the analysis pipeline.
 7. Review `data/analysis/game_coach_report.md` for the current game, `data/analysis/deck_coach_report.md` after a deck review, or `data/analysis/deterministic_analysis.json` for raw evidence.
 8. Optionally run `python3 scripts/run_analysis.py --with-workbook` if you want the full workbook.
 9. Choose one experiment from `experiments/` or add a new one.
 
-## Coaching Object
+## Coaching Contracts
 
-AI coaching recommendations should use this shape:
+Game Coach answers exactly: Win/Loss, Biggest Lesson, Experiment Status, Biggest Mistake, and Next Game Focus.
+
+Deck Coach answers exactly: Is The Current Experiment Finished, What Did We Actually Learn, What Deck Change Do You Recommend, Confidence, and Next Experiment.
+
+Deck Coach uses the local Standard-legal card database through `deterministic_evidence.card_recommendations` and recommends one experiment at a time.
+
+Legacy AI coaching recommendations may still use this shape:
 
 ```json
 {

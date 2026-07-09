@@ -182,13 +182,11 @@ def main() -> int:
     prompt = Path(args.prompt).read_text(encoding="utf-8")
     context = build_context(args)
     labels = [
-        ("Active Experiment", "active_experiment"),
-        ("Verdict", "verdict"),
-        ("Why", "why"),
-        ("Experiment Status", "experiment_status"),
-        ("Next Focus", "next_focus"),
-        ("Next Experiment", "next_experiment"),
+        ("Is The Current Experiment Finished?", "experiment_finished"),
+        ("What Did We Actually Learn?", "what_we_learned"),
+        ("What Deck Change Do You Recommend?", "deck_change"),
         ("Confidence", "confidence"),
+        ("Next Experiment", "next_experiment"),
     ]
     result = run_llm_report(args, prompt, context, "Deck Coach", labels)
     if result == 0 and args.experiment == "current" and not args.dry_run and is_completed(context.get("current_experiment")):

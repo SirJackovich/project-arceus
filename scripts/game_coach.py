@@ -277,12 +277,11 @@ def main() -> int:
     prompt = Path(args.prompt).read_text(encoding="utf-8")
     context = build_context(args)
     labels = [
-        ("Verdict", "verdict"),
-        ("Why", "why"),
-        ("Biggest Positive", "biggest_positive"),
+        ("Win/Loss", "win_loss"),
+        ("Biggest Lesson", "biggest_lesson"),
+        ("Experiment Status", "experiment_status"),
         ("Biggest Mistake", "biggest_mistake"),
-        ("Next Focus", "next_focus"),
-        ("Confidence", "confidence"),
+        ("Next Game Focus", "next_game_focus"),
     ]
     return run_llm_report(args, prompt, context, "Game Coach", labels)
 

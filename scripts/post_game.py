@@ -18,6 +18,7 @@ from src.experiment_memory import is_completed, progress_line, sync_current_from
 ANALYSIS_DIR = Path("data/analysis")
 MANIFEST = Path("data/manifest.csv")
 CURRENT_EXPERIMENT = Path("data/experiments/current.json")
+DEFAULT_DECK_VERSION = "decks/annihilape/v01.json"
 
 
 def run_step(command, verbose=False, allow_failure=False):
@@ -48,6 +49,24 @@ def latest_manifest_row():
     with MANIFEST.open(newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     return rows[-1] if rows else {}
+
+
+def canonical_deck_version(deck_version):
+    if not deck_version:
+        return DEFAULT_DECK_VERSION
+    deck_path = Path(deck_version)
+    if deck_path.exists():
+        return deck_version
+    if deck_path.parts and deck_path.parts[0] == "deck":
+        corrected = Path("decks", *deck_path.parts[1:])
+        if corrected.exists():
+            return str(corrected)
+    return deck_version
+
+
+def latest_deck_version():
+    row = latest_manifest_row()
+    return canonical_deck_version(row.get("deck_version", ""))
 
 
 def game_number_from_id(game_id):
@@ -97,14 +116,20 @@ def main():
     parser.add_argument("--ai-dry-run", action="store_true", help="Write AI prompt/context without calling the LLM.")
     args = parser.parse_args()
 
-    import_command = [sys.executable, "scripts/import_log.py"]
+    import_command = [
+        sys.executable,
+        "scripts/import_log.py",
+        "--deck-version",
+        latest_deck_version(),
+    ]
     if not args.verbose:
         import_command.append("--quiet")
     subprocess.run(import_command, check=True)
 
+    deck_version = latest_deck_version()
     run_step([sys.executable, "scripts/analyze_logs.py"], verbose=args.verbose)
-    run_step([sys.executable, "scripts/evaluate_success.py"], verbose=args.verbose)
-    coach_command = [sys.executable, "scripts/coach_report.py", "--last", str(args.last)]
+    run_step([sys.executable, "scripts/evaluate_success.py", "--deck", deck_version], verbose=args.verbose)
+    coach_command = [sys.executable, "scripts/coach_report.py", "--last", str(args.last), "--deck", deck_version]
     if args.verbose:
         coach_command.append("--verbose")
     run_step(coach_command, verbose=args.verbose)
@@ -123,7 +148,7 @@ def main():
         print(top_issue_line())
         return 0
 
-    game_command = [sys.executable, "scripts/game_coach.py", "--game", "latest"]
+    game_command = [sys.executable, "scripts/game_coach.py", "--game", "latest", "--deck", deck_version]
     if args.ai_dry_run:
         game_command.append("--dry-run")
     if args.verbose:
@@ -131,7 +156,17 @@ def main():
     result = run_step(game_command, verbose=args.verbose, allow_failure=True)
     if args.verbose:
         if args.deck_review or deck_review_due:
-            deck_command = [sys.executable, "scripts/deck_coach.py", "--experiment", "current", "--last", str(args.last), "--verbose"]
+            deck_command = [
+                sys.executable,
+                "scripts/deck_coach.py",
+                "--experiment",
+                "current",
+                "--last",
+                str(args.last),
+                "--deck",
+                deck_version,
+                "--verbose",
+            ]
             if args.ai_dry_run:
                 deck_command.append("--dry-run")
             run_step(deck_command, verbose=True, allow_failure=True)
@@ -143,7 +178,16 @@ def main():
         print("Game Coach unavailable. Deterministic evidence was still generated.")
 
     if args.deck_review or deck_review_due:
-        deck_command = [sys.executable, "scripts/deck_coach.py", "--experiment", "current", "--last", str(args.last)]
+        deck_command = [
+            sys.executable,
+            "scripts/deck_coach.py",
+            "--experiment",
+            "current",
+            "--last",
+            str(args.last),
+            "--deck",
+            deck_version,
+        ]
         if args.ai_dry_run:
             deck_command.append("--dry-run")
         deck_result = run_step(deck_command, verbose=False, allow_failure=True)

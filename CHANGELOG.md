@@ -2,6 +2,24 @@
 
 Each Codex change should add a new entry that says what changed, why it changed, and how to test it.
 
+## v0.10.1
+
+- What changed: `scripts/post_game.py` now defaults the import deck version to the previous manifest entry instead of always using `decks/annihilape/v01.json`.
+- What changed: `post_game.py` passes the imported game's deck into `evaluate_success.py`, `coach_report.py`, `game_coach.py`, and `deck_coach.py` so the whole workflow evaluates the deck actually used.
+- What changed: `scripts/import_log.py` now also defaults direct imports to the previous manifest deck, with a guard for accidental `deck/...` paths when the matching `decks/...` file exists.
+- Why: Post-game coaching should follow the active deck version, especially after moving from v01 to v02.
+- How to test: Run `python3 scripts/check_project.py` and `python3 -m pytest tests/test_post_game.py tests/test_import_log.py`.
+
+## v0.10.0
+
+- What changed: Reframed Game Coach and Deck Coach prompts around coaching judgment instead of deterministic summaries.
+- What changed: Game Coach now answers exactly Win/Loss, Biggest Lesson, Experiment Status, Biggest Mistake, and Next Game Focus.
+- What changed: Deck Coach now answers exactly Is The Current Experiment Finished, What Did We Actually Learn, What Deck Change Do You Recommend, Confidence, and Next Experiment.
+- What changed: Deck Coach is instructed to use Standard-legal card recommendations to choose one next experiment when the current experiment is complete.
+- What changed: AI summary parsing now supports nested Deck Coach JSON objects.
+- Why: The LLM should act like a personal Pokemon coach that explains lessons and proposes hypotheses, not a report generator repeating deterministic stats.
+- How to test: Run `python3 scripts/check_project.py`, `python3 scripts/game_coach.py --game latest --dry-run`, and `python3 scripts/deck_coach.py --experiment current --dry-run`.
+
 ## v0.9.4
 
 - What changed: Deck Coach context and output instructions now always include the active experiment's exact Remove/Add deck change.

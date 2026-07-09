@@ -99,14 +99,26 @@ def response_text(response: dict) -> str:
 
 
 def extract_json_summary(text: str) -> dict:
-    blocks = re.findall(r"```json\s*(\{.*?\})\s*```", text, flags=re.DOTALL)
-    candidates = blocks or re.findall(r"(\{\s*\"(?:verdict|coach_grade)\".*\})", text, flags=re.DOTALL)
+    blocks = re.findall(r"```json\s*(.*?)\s*```", text, flags=re.DOTALL)
+    candidates = blocks or json_object_candidates(text)
     for candidate in reversed(candidates):
         try:
             return json.loads(candidate)
         except json.JSONDecodeError:
             continue
     return {"parse_status": "missing_json_summary"}
+
+
+def json_object_candidates(text: str) -> list[str]:
+    decoder = json.JSONDecoder()
+    candidates = []
+    for match in re.finditer(r"\{\s*\"(?:verdict|coach_grade|win_loss|experiment_finished)\"", text):
+        try:
+            _, end = decoder.raw_decode(text[match.start():])
+        except json.JSONDecodeError:
+            continue
+        candidates.append(text[match.start():match.start() + end])
+    return candidates
 
 
 def format_terminal_value(value: Any) -> str:
@@ -126,6 +138,8 @@ def format_terminal_value(value: Any) -> str:
                 lines.append(f"- {row.get('card', '')} x{row.get('count', 1)}".rstrip())
         if value.get("hypothesis"):
             lines.extend(["", "Hypothesis:", str(value["hypothesis"])])
+        if value.get("explanation"):
+            lines.extend(["", str(value["explanation"])])
         criteria = value.get("success_criteria") or []
         if criteria:
             lines.extend(["", "Success Criteria:"])
@@ -140,7 +154,7 @@ def format_terminal_value(value: Any) -> str:
 
 
 def terminal_report(markdown: str, summary: dict, title: str, labels: list) -> str:
-    if summary and "verdict" in summary:
+    if summary and any(key in summary for _, key in labels):
         lines = [title, ""]
         for heading, key in labels:
             value = format_terminal_value(summary.get(key, "")) or "Not provided"
